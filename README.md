@@ -1,28 +1,30 @@
-# 🚀 Workshop ClusterAPI Express - 90 Minutes
+# 🚀 Workshop ClusterAPI Express - 2 Heures
 
-## **De Zéro à Production : ClusterAPI et k0smotron en 90 Minutes**
+## **De Zéro à Production : ClusterAPI et k0smotron en 2 Heures**
 
-[![ClusterAPI](https://img.shields.io/badge/ClusterAPI-v1.5.3-blue)](https://cluster-api.sigs.k8s.io/)
-[![k0smotron](https://img.shields.io/badge/k0smotron-v1.8.0-green)](https://k0smotron.io/)
-[![Duration](https://img.shields.io/badge/Duration-90%20minutes-orange)]()
+[![ClusterAPI](https://img.shields.io/badge/ClusterAPI-v1.11.1-blue)](https://cluster-api.sigs.k8s.io/)
+[![k0smotron](https://img.shields.io/badge/k0smotron-v1.7.0-green)](https://k0smotron.io/)
+[![Duration](https://img.shields.io/badge/Duration-120%20minutes-orange)]()
 [![Format](https://img.shields.io/badge/Format-Hands--on%20Guided-success)]()
 
 ---
 
 ## 📋 **Vue d'Ensemble**
 
-Bienvenue dans ce workshop **hands-on guidé** où vous allez apprendre à orchestrer des clusters Kubernetes avec **ClusterAPI** et **k0smotron** en seulement **90 minutes** !
+Bienvenue dans ce workshop **hands-on guidé** où vous allez apprendre à orchestrer des clusters Kubernetes avec **ClusterAPI** et **k0smotron** en seulement **2 heures** !
 
 ### **Ce que vous allez accomplir**
 ✅ Créer votre premier cluster Kubernetes avec ClusterAPI
 ✅ Installer automatiquement le CNI Calico avec ClusterResourceSets
 ✅ Découvrir k0smotron et ses économies de ressources (55%)
-✅ Automatiser le déploiement d'applications avec Helm
+✅ Déployer simultanément multiples clusters avec Helm
+✅ Automatiser le déploiement d'applications multi-clusters
+✅ Mettre à jour plusieurs clusters en parallèle
 ✅ Scaler et monitorer vos clusters
 
 ### **Format du Workshop**
-- **Durée totale:** 90 minutes
-- **Format:** 6 modules guidés pas-à-pas
+- **Durée totale:** 120 minutes (2 heures)
+- **Format:** 8 modules guidés pas-à-pas
 - **Style:** Démonstration + action immédiate
 - **Niveau:** Débutant à Intermédiaire
 - **Prérequis:** Connaissances Kubernetes de base
@@ -33,35 +35,40 @@ Bienvenue dans ce workshop **hands-on guidé** où vous allez apprendre à orche
 
 | Module | Titre | Durée | Objectif |
 |--------|-------|-------|----------|
-| [00](./00-introduction/) | Introduction & Setup | 10 min | Comprendre ClusterAPI + vérifier environnement |
+| [00-introduction](./00-introduction/) | Introduction & Outils | 10 min | Comprendre ClusterAPI + vérifier outils |
+| [00-setup](./00-setup-management/) | **Setup Management Cluster** | 15 min | **Créer cluster kind + installer ClusterAPI** |
 | [01](./01-premier-cluster/) | Premier Cluster ClusterAPI | 15 min | Créer un cluster Docker provider fonctionnel |
 | [02](./02-networking-calico/) | Networking avec Calico | 15 min | Installer Calico CNI automatiquement |
 | [03](./03-k0smotron/) | k0smotron Control Planes | 15 min | Créer cluster k0smotron + comparer ressources |
-| [04](./04-automation-helm/) | Automation avec Helm | 20 min | Déployer apps avec HelmChartProxy |
-| [05](./05-operations-cleanup/) | Operations & Cleanup | 15 min | Scaler, monitorer, nettoyer |
+| [04](./04-multi-cluster-deployment/) | **Déploiement Multi-Cluster** | 15 min | **Déployer 3 clusters simultanément via Helm** |
+| [05](./05-automation-helm/) | Automation avec Helm | 20 min | Déployer apps avec HelmChartProxy |
+| [06](./06-cluster-upgrades/) | **Upgrades Multi-Cluster** | 15 min | **Mettre à jour plusieurs clusters en parallèle** |
+| [07](./07-operations-cleanup/) | Operations & Cleanup | 15 min | Scaler, monitorer, nettoyer |
 
 **Progression:**
-Fondations → Networking → k0smotron → Automation → Operations
+Outils → **Management** → Premier Cluster → Networking → k0smotron → **Multi-Cluster** → Automation → **Upgrades** → Operations
 
 ---
 
 ## 🔧 **Prérequis Techniques**
 
-### **Infrastructure Pré-provisionnée**
+### **Outils Requis**
 
-Votre environnement de workshop dispose déjà de:
+Avant de commencer le workshop, vous devez avoir installé:
 
 ```bash
-✅ Management Cluster (kind) opérationnel
-✅ ClusterAPI v1.5.3 installé
-✅ Docker Provider configuré
-✅ k0smotron operator déployé
-✅ Helm Addon Provider installé
+✅ Docker Desktop (ou Docker Engine)
+✅ kubectl (CLI Kubernetes)
+✅ kind (Kubernetes IN Docker)
+✅ clusterctl (CLI ClusterAPI)
+✅ helm (Package manager Kubernetes)
+✅ jq (Parser JSON en ligne de commande)
+✅ tree (Visualisation arborescente de répertoires)
 ```
 
-### **Validation de l'Environnement**
+### **Validation des Outils**
 
-Avant de commencer, vérifiez votre accès:
+Module 00-introduction vous guide pour vérifier l'installation:
 
 ```bash
 cd workshop-express/00-introduction
@@ -70,14 +77,76 @@ cd workshop-express/00-introduction
 
 **Résultat attendu:**
 ```
-✅ kubectl accessible
-✅ Management cluster accessible
-✅ ClusterAPI installé (v1.5.3)
-✅ Docker provider ready
-✅ k0smotron operator running
-✅ Helm provider ready
-🎉 Environnement prêt pour le workshop!
+✅ Docker installé (version 27.4.0+)
+✅ kind installé (version 0.30.0+)
+✅ kubectl installé (version 1.32.0+)
+✅ clusterctl installé (version 1.11.1+)
+✅ helm installé (version 3.19.0+)
+✅ jq installé
+✅ tree installé
+🎉 Tous les outils sont prêts pour le workshop!
 ```
+
+### **Configuration des Limites Système (IMPORTANT)**
+
+Le workshop crée de nombreux clusters et containers. Vous **DEVEZ** augmenter les limites système pour éviter les erreurs.
+
+**Script automatique (recommandé) :**
+
+```bash
+cd workshop-express/00-introduction
+./configure-system-limits.sh
+```
+
+**Configuration manuelle rapide (Linux) :**
+
+```bash
+# Limites kernel
+echo "fs.inotify.max_user_watches=524288" | sudo tee -a /etc/sysctl.conf
+echo "fs.file-max=2097152" | sudo tee -a /etc/sysctl.conf
+echo "kernel.pid_max=4194304" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Limites utilisateur
+cat << EOF | sudo tee -a /etc/security/limits.conf
+*    soft    nofile    1048576
+*    hard    nofile    1048576
+EOF
+
+# Docker limits
+sudo mkdir -p /etc/systemd/system/docker.service.d
+cat << EOF | sudo tee /etc/systemd/system/docker.service.d/limits.conf
+[Service]
+LimitNOFILE=1048576
+LimitNPROC=infinity
+EOF
+sudo systemctl daemon-reload && sudo systemctl restart docker
+```
+
+**Configuration macOS :**
+
+```bash
+sudo launchctl limit maxfiles 1048576 1048576
+# Puis configurez Docker Desktop → Resources (8GB+ RAM, 4+ CPUs)
+```
+
+**⚠️ Reconnectez-vous après la configuration pour appliquer les limites !**
+
+### **Installation du Management Cluster**
+
+Module 00-setup-management vous guide pour créer l'infrastructure:
+
+```bash
+cd workshop-express/00-setup-management
+cat commands.md  # Instructions complètes
+```
+
+Vous installerez:
+- ✅ Cluster kind de management
+- ✅ ClusterAPI v1.11.1 + Docker Provider
+- ✅ k0smotron operator v1.7.0
+- ✅ Helm Addon Provider v0.3.2
+- ✅ cert-manager
 
 ---
 
@@ -148,14 +217,26 @@ Chaque module a un script de validation:
 - Comparer les ressources vs Docker provider
 - Mesurer les économies (55% nodes, 50% memory)
 
-### **Module 04: Automation avec Helm (20 min)**
+### **Module 04: Déploiement Multi-Cluster (15 min) [NOUVEAU]**
+- Utiliser un Helm chart pour déployer 3 clusters simultanément
+- Observer la création parallèle vs séquentielle
+- Comprendre le templating Helm pour ClusterAPI
+- Mesurer les gains de temps (67% plus rapide)
+
+### **Module 05: Automation avec Helm (20 min)**
 - Comprendre HelmChartProxy et GitOps
 - Déployer nginx automatiquement sur plusieurs clusters
 - Observer le déploiement multi-clusters
 - Tester l'application déployée
 - Faire une mise à jour déclarative
 
-### **Module 05: Operations & Cleanup (15 min)**
+### **Module 06: Upgrades Multi-Cluster (15 min) [NOUVEAU]**
+- Mettre à jour simultanément plusieurs clusters Kubernetes
+- Observer le rolling upgrade zero-downtime
+- Comprendre le drain/upgrade/rejoin automatisé
+- Vérifier la santé post-upgrade
+
+### **Module 07: Operations & Cleanup (15 min)**
 - Scaler les workers dynamiquement
 - Monitorer les ressources des clusters
 - Cleanup complet de l'environnement
@@ -388,10 +469,12 @@ Module 0 (10min)  → Comprendre ClusterAPI
 Module 1 (15min)  → Créer premier cluster
 Module 2 (15min)  → Installer CNI automatiquement
 Module 3 (15min)  → Découvrir k0smotron
-Module 4 (20min)  → Automatiser avec Helm
-Module 5 (15min)  → Operations & Cleanup
+Module 4 (15min)  → Déployer 3 clusters en parallèle [NOUVEAU]
+Module 5 (20min)  → Automatiser avec Helm
+Module 6 (15min)  → Upgrader clusters simultanément [NOUVEAU]
+Module 7 (15min)  → Operations & Cleanup
                      ↓
-        🎉 Expert ClusterAPI en 90 minutes!
+        🎉 Expert ClusterAPI en 2 heures!
 ```
 
 ---
@@ -408,4 +491,4 @@ cat commands.md
 ---
 
 *Workshop Express ClusterAPI - Version 1.0*
-*Basé sur ClusterAPI v1.5.3 | k0smotron v1.8.0 | Kubernetes v1.28+*
+*Basé sur ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32.8 | Helm v3.19.0*

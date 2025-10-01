@@ -1,0 +1,38 @@
+{{- range .Values.clusters }}
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+metadata:
+  name: {{ .name }}-control-plane
+  namespace: default
+spec:
+  replicas: {{ .controlPlaneReplicas }}
+  version: {{ .kubernetesVersion }}
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+      kind: DockerMachineTemplate
+      name: {{ .name }}-control-plane
+  kubeadmConfigSpec:
+    clusterConfiguration:
+      controllerManager:
+        extraArgs:
+          enable-hostpath-provisioner: "true"
+      apiServer:
+        certSANs:
+          - localhost
+          - 127.0.0.1
+          - 0.0.0.0
+    initConfiguration:
+      nodeRegistration:
+        criSocket: unix:///var/run/containerd/containerd.sock
+        kubeletExtraArgs:
+          cgroup-driver: systemd
+          eviction-hard: nodefs.available<0%,nodefs.inodesFree<0%,imagefs.available<0%
+    joinConfiguration:
+      nodeRegistration:
+        criSocket: unix:///var/run/containerd/containerd.sock
+        kubeletExtraArgs:
+          cgroup-driver: systemd
+          eviction-hard: nodefs.available<0%,nodefs.inodesFree<0%,imagefs.available<0%
+{{- end }}

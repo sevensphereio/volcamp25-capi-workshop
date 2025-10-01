@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🔍 Module 04: Validation Automation Helm"
+echo "🔍 Module 05: Validation Automation Helm"
 echo "======================================="
 echo ""
 
@@ -159,12 +159,12 @@ echo "   🔄 GitOps: ajout cluster = déploiement auto"
 echo ""
 echo "======================================="
 if [ $FAILED -eq 0 ]; then
-    echo "🎉 Module 04 terminé avec succès!"
-    echo "🚀 Prêt pour Module 05: Operations & Cleanup"
+    echo "🎉 Module 05 terminé avec succès!"
+    echo "🚀 Prêt pour Module 06: Cluster Upgrades"
     echo "======================================="
     echo ""
     echo "Prochaine commande:"
-    echo "  cd ../05-operations-cleanup"
+    echo "  cd ../06-cluster-upgrades"
     echo "  cat commands.md"
     exit 0
 else

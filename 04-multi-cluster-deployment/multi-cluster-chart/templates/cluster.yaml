@@ -1,0 +1,28 @@
+{{- range .Values.clusters }}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: {{ .name }}
+  namespace: default
+  labels:
+    {{- range $key, $val := $.Values.defaultLabels }}
+    {{ $key }}: {{ $val }}
+    {{- end }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - {{ .podCIDR }}
+    services:
+      cidrBlocks:
+        - {{ .serviceCIDR }}
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    kind: KubeadmControlPlane
+    name: {{ .name }}-control-plane
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: DockerCluster
+    name: {{ .name }}
+{{- end }}

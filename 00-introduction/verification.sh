@@ -2,8 +2,8 @@
 
 set -e
 
-echo "🔍 Module 00: Validation Environnement"
-echo "========================================"
+echo "🔍 Module 00: Validation Installation Outils"
+echo "============================================="
 echo ""
 
 FAILED=0
@@ -17,55 +17,83 @@ check() {
     fi
 }
 
-kubectl version --client &>/dev/null
-check "kubectl accessible"
+check_version() {
+    TOOL=$1
+    VERSION=$2
+    if [ -n "$VERSION" ] && [ "$VERSION" != "unknown" ]; then
+        echo "✅ $TOOL installé (version $VERSION)"
+    else
+        echo "❌ $TOOL non trouvé"
+        FAILED=$((FAILED + 1))
+    fi
+}
 
-kubectl cluster-info --context kind-capi-management &>/dev/null
-check "Management cluster accessible"
+# Vérifier Docker
+DOCKER_VERSION=$(docker --version 2>/dev/null | awk '{print $3}' | sed 's/,//')
+check_version "Docker" "$DOCKER_VERSION"
 
-kubectl get deployments -n capi-system capi-controller-manager &>/dev/null
-check "ClusterAPI installé"
+# Vérifier kind
+KIND_VERSION=$(kind --version 2>/dev/null | awk '{print $3}')
+check_version "kind" "$KIND_VERSION"
 
-VERSION=$(kubectl get deployments -n capi-system capi-controller-manager -o jsonpath='{.metadata.labels.cluster\.x-k8s\.io/provider}' 2>/dev/null || echo "unknown")
-if [ "$VERSION" != "unknown" ]; then
-    echo "   Version: cluster-api"
+# Vérifier kubectl
+KUBECTL_VERSION=$(kubectl version --client --short 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+if [ -z "$KUBECTL_VERSION" ]; then
+    KUBECTL_VERSION=$(kubectl version --client 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 fi
+check_version "kubectl" "$KUBECTL_VERSION"
 
-kubectl get deployments -n capi-system capd-controller-manager &>/dev/null
-check "Docker provider ready"
+# Vérifier kubectl plugins
+kubectl ctx --help &>/dev/null
+check "kubectl plugin: ctx installé"
 
-kubectl get pods -n k0smotron -l control-plane=controller-manager --field-selector=status.phase=Running &>/dev/null
-check "k0smotron operator running"
+kubectl ns --help &>/dev/null
+check "kubectl plugin: ns installé"
 
-kubectl get deployments -n capi-addon-system capi-addon-helm-controller-manager &>/dev/null 2>&1
-if [ $? -eq 0 ]; then
-    check "Helm provider ready"
-else
-    echo "⚠️  Helm provider not found (optional for Module 01-03)"
+kubectl slice --help &>/dev/null
+check "kubectl plugin: slice installé"
+
+kubectl klock --help &>/dev/null
+check "kubectl plugin: klock installé"
+
+# Vérifier clusterctl
+CLUSTERCTL_VERSION=$(clusterctl version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+check_version "clusterctl" "$CLUSTERCTL_VERSION"
+
+# Vérifier Helm
+HELM_VERSION=$(helm version --short 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+check_version "Helm" "$HELM_VERSION"
+
+# Vérifier jq
+JQ_VERSION=$(jq --version 2>/dev/null | sed 's/jq-//')
+check_version "jq" "$JQ_VERSION"
+
+# Vérifier yq
+YQ_VERSION=$(yq --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed 's/v//')
+check_version "yq" "$YQ_VERSION"
+
+# Vérifier tree
+TREE_VERSION=$(tree --version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed 's/v//')
+if [ -z "$TREE_VERSION" ]; then
+    TREE_VERSION=$(tree --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 fi
-
-CLUSTER_COUNT=$(kubectl get clusters --no-headers 2>/dev/null | wc -l)
-if [ "$CLUSTER_COUNT" -eq 0 ]; then
-    check "No existing workload clusters (clean slate)"
-else
-    echo "⚠️  Warning: $CLUSTER_COUNT workload cluster(s) already exist"
-fi
+check_version "tree" "$TREE_VERSION"
 
 echo ""
-echo "========================================"
+echo "============================================="
 if [ $FAILED -eq 0 ]; then
     echo "🎉 Module 00 terminé avec succès!"
-    echo "🚀 Prêt pour Module 01: Premier Cluster ClusterAPI"
-    echo "========================================"
+    echo "🚀 Tous les outils sont prêts pour le workshop"
+    echo "============================================="
     echo ""
     echo "Prochaine commande:"
-    echo "  cd ../01-premier-cluster"
+    echo "  cd ../00-setup-management"
     echo "  cat commands.md"
     exit 0
 else
     echo "❌ $FAILED test(s) échoué(s)"
-    echo "========================================"
+    echo "============================================="
     echo ""
-    echo "Contactez le formateur pour résoudre les problèmes."
+    echo "Retournez dans commands.md pour installer les outils manquants."
     exit 1
 fi

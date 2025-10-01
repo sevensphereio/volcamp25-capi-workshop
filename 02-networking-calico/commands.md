@@ -1,36 +1,80 @@
-# Module 02: Networking avec Calico - Commandes
+# Module 02: Networking avec Calico
 
 **Durée:** 15 minutes
-**Objectif:** Installer Calico CNI automatiquement avec ClusterResourceSets et passer les nodes à Ready
 
 ---
 
-## 📖 Partie 1: Diagnostic du Problème (3 minutes)
+## 🎯 Objectifs & Concepts
 
-### Vérifier l'état des nodes
+### Ce que vous allez apprendre
+- Pourquoi les nodes sont NotReady sans CNI (Container Network Interface)
+- Comment ClusterResourceSet automatise le déploiement d'addons
+- Déployer Calico automatiquement avec le pattern label-based
+- Passer les nodes de NotReady à Ready
 
+### Concepts clés
+**CNI (Container Network Interface):** Plugin réseau qui permet la communication pod-to-pod. Sans CNI, kubelet déclare les nodes NotReady car il ne peut pas garantir la connectivité réseau.
+
+**ClusterResourceSet (CRS):** Mécanisme ClusterAPI pour déployer automatiquement des ressources (addons) sur les workload clusters via sélection par labels. Équivalent d'un "système d'installation automatique" : un label sur le cluster déclenche le déploiement.
+
+**Workflow CRS:**
+```
+1. Créer ClusterResourceSet + ConfigMap (contient manifeste)
+2. Labeller le cluster cible
+3. CRS controller détecte le match et applique automatiquement
+```
+
+**Avantages vs installation manuelle:**
+- Automatique dès labelling (pas de kubectl apply manuel)
+- Déclaratif et versionné Git (GitOps ready)
+- Réutilisable pour N clusters (même label = même addon)
+- Self-service (nouveau cluster avec label = addon auto-installé)
+
+---
+
+## 📋 Actions Pas-à-Pas
+
+### Action 1: Diagnostiquer le problème réseau
+
+**Objectif:** Comprendre pourquoi les nodes sont NotReady
+
+**Commande:**
 ```bash
 cd /home/ubuntu/R_D/CLAUDE_PROJECTS/capi-workshop/workshop-express/02-networking-calico
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get nodes
 ```
 
-**Résultat actuel:**
+**Explication de la commande:**
+- `--kubeconfig`: pointe vers le kubeconfig du workload cluster dev-cluster
+- `get nodes`: affiche l'état des nodes du cluster
+
+**Résultat attendu:**
 ```
 NAME                              STATUS     ROLES           AGE   VERSION
-dev-cluster-control-plane-xxxx    NotReady   control-plane   5m    v1.28.3
-dev-cluster-md-0-yyyyy-zzzzz      NotReady   <none>          4m    v1.28.3
-dev-cluster-md-0-yyyyy-aaaaa      NotReady   <none>          4m    v1.28.3
+dev-cluster-control-plane-xxxx    NotReady   control-plane   5m    v1.32.8
+dev-cluster-md-0-yyyyy-zzzzz      NotReady   <none>          4m    v1.32.8
+dev-cluster-md-0-yyyyy-aaaaa      NotReady   <none>          4m    v1.32.8
 ```
 
-**❌ STATUS: NotReady**
+**✅ Vérification:** Tous les nodes sont en STATUS NotReady. C'est normal à ce stade : aucun CNI n'est installé.
 
-### Diagnostiquer la cause
+---
 
+### Action 2: Identifier la cause (CNI manquant)
+
+**Objectif:** Confirmer que le problème vient de l'absence de CNI
+
+**Commande:**
 ```bash
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig describe node dev-cluster-control-plane-* | grep -A 5 "Conditions:"
 ```
 
-**Résultat clé:**
+**Explication de la commande:**
+- `describe node`: affiche les détails d'un node
+- `dev-cluster-control-plane-*`: wildcard pour matcher le nom du node control plane
+- `grep -A 5 "Conditions:"`: filtre pour afficher les conditions du node (5 lignes après)
+
+**Résultat attendu:**
 ```
 Conditions:
   Type             Status
@@ -39,66 +83,24 @@ Conditions:
   Message: network plugin is not ready: cni config uninitialized
 ```
 
-**🔍 Problème identifié:** Pas de CNI installé!
-
-### Vérifier les pods kube-system
-
-```bash
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system
-```
-
-**Résultat:**
-```
-NAME                                            READY   STATUS
-coredns-xxx                                     0/1     Pending
-coredns-yyy                                     0/1     Pending
-etcd-dev-cluster-control-plane-xxxx             1/1     Running
-kube-apiserver-dev-cluster-control-plane-xxxx   1/1     Running
-...
-```
-
-**CoreDNS est Pending** car il attend le réseau pod.
+**✅ Vérification:** Le message confirme "network plugin is not ready". Le CNI n'est pas configuré.
 
 ---
 
-## 📚 Partie 2: Comprendre ClusterResourceSet (3 minutes)
+### Action 3: Analyser le manifeste ClusterResourceSet
 
-### Qu'est-ce qu'un ClusterResourceSet?
+**Objectif:** Comprendre la structure du CRS avant de l'appliquer
 
-**ClusterResourceSet (CRS)** est un mécanisme ClusterAPI pour déployer automatiquement des ressources (addons) sur les workload clusters.
-
-### Architecture CRS
-
-```
-Management Cluster
-├── ClusterResourceSet (définit QUOI et QUAND)
-│   ├── clusterSelector: cni: calico  ← Sélection par label
-│   └── resources: ConfigMap calico-addon
-│
-├── ConfigMap (contient les manifestes)
-│   └── data:
-│       └── calico.yaml: |
-│           <manifestes Calico complets>
-│
-└── Clusters avec label cni: calico
-    ↓
-    Calico appliqué automatiquement!
-```
-
-### Avantages CRS
-
-✅ **Automatique:** Dès qu'un cluster a le bon label, les ressources sont appliquées
-✅ **Déclaratif:** Tout en YAML, versionné dans Git
-✅ **Réutilisable:** Un CRS pour tous les clusters avec le même label
-✅ **Standard:** Pattern ClusterAPI officiel
-
-### Explorer le manifeste
-
+**Commande:**
 ```bash
-cat calico-crs.yaml | head -20
+cat calico-crs.yaml | head -30
 ```
 
-**Résultat:**
+**Explication de la commande:**
+- `cat`: affiche le contenu du fichier
+- `head -30`: limite l'affichage aux 30 premières lignes pour voir la structure
+
+**Résultat attendu:**
 ```yaml
 apiVersion: addons.cluster.x-k8s.io/v1beta1
 kind: ClusterResourceSet
@@ -107,30 +109,37 @@ metadata:
 spec:
   clusterSelector:
     matchLabels:
-      cni: calico          ← Cherche les clusters avec ce label
+      cni: calico          # Cible les clusters avec ce label
   resources:
-  - name: calico-addon     ← Référence au ConfigMap
+  - name: calico-addon     # Référence au ConfigMap
     kind: ConfigMap
-  strategy: ApplyOnce      ← Appliqué une seule fois
+  strategy: ApplyOnce      # Appliqué une seule fois
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: calico-addon
 data:
-  calico.yaml: |           ← Manifeste Calico complet (7000+ lignes)
+  calico.yaml: |           # Manifeste Calico complet (7000+ lignes)
     ...
 ```
 
+**✅ Vérification:** Le CRS contient 2 objets : ClusterResourceSet (règle) + ConfigMap (manifeste Calico)
+
 ---
 
-## 🚀 Partie 3: Créer le ClusterResourceSet (3 minutes)
+### Action 4: Créer le ClusterResourceSet
 
-### Appliquer le CRS
+**Objectif:** Déployer la règle CRS dans le management cluster
 
+**Commande:**
 ```bash
 kubectl apply -f calico-crs.yaml
 ```
+
+**Explication de la commande:**
+- `apply -f`: crée ou met à jour les ressources définies dans le fichier YAML
+- `calico-crs.yaml`: fichier contenant ClusterResourceSet + ConfigMap
 
 **Résultat attendu:**
 ```
@@ -138,90 +147,90 @@ clusterresourceset.addons.cluster.x-k8s.io/calico-cni created
 configmap/calico-addon created
 ```
 
-**2 objets créés:**
-1. **ClusterResourceSet:** Définit la règle d'application
-2. **ConfigMap:** Contient le manifeste Calico v3.26.3
+**✅ Vérification:** 2 objets créés : le CRS (règle) et le ConfigMap (données Calico)
 
-### Vérifier le CRS créé
+---
 
+### Action 5: Vérifier le CRS créé
+
+**Objectif:** Confirmer que le CRS existe et est actif
+
+**Commande:**
 ```bash
 kubectl get clusterresourceset
 ```
 
-**Résultat:**
+**Explication de la commande:**
+- `get clusterresourceset`: liste tous les ClusterResourceSets du management cluster
+
+**Résultat attendu:**
 ```
 NAME         AGE
 calico-cni   10s
 ```
 
-### Détails du CRS
-
-```bash
-kubectl describe clusterresourceset calico-cni
-```
-
-**Points clés:**
-- Cluster Selector: `cni=calico`
-- Resources: ConfigMap/calico-addon
-- Strategy: ApplyOnce
+**✅ Vérification:** Le CRS calico-cni apparaît dans la liste
 
 ---
 
-## 🏷️ Partie 4: Activer le CRS sur le Cluster (2 minutes)
+### Action 6: Activer le CRS en labellant le cluster
 
-### Labeller le cluster dev-cluster
+**Objectif:** Déclencher le déploiement automatique de Calico
 
-Pour que le CRS s'applique, le cluster doit avoir le label `cni: calico`:
-
+**Commande:**
 ```bash
 kubectl label cluster dev-cluster cni=calico
 ```
 
-**Résultat:**
+**Explication de la commande:**
+- `label cluster dev-cluster`: ajoute un label au cluster dev-cluster
+- `cni=calico`: label qui matche le clusterSelector du CRS
+
+**Résultat attendu:**
 ```
 cluster.cluster.x-k8s.io/dev-cluster labeled
 ```
 
-**🎯 Déclencheur:** Dès que le label est appliqué, ClusterAPI détecte le match et applique le CRS!
+**✅ Vérification:** Le label est ajouté. Le CRS controller va détecter le match et appliquer Calico automatiquement dans les secondes qui suivent.
 
-### Vérifier le label
+---
 
+### Action 7: Vérifier le label appliqué
+
+**Objectif:** Confirmer que le label est bien présent sur le cluster
+
+**Commande:**
 ```bash
 kubectl get cluster dev-cluster --show-labels
 ```
 
-**Résultat:**
+**Explication de la commande:**
+- `--show-labels`: affiche tous les labels du cluster dans la sortie
+
+**Résultat attendu:**
 ```
 NAME          PHASE        AGE   LABELS
 dev-cluster   Provisioned  10m   cni=calico,environment=demo
 ```
 
-### Vérifier l'application du CRS
-
-```bash
-kubectl get clusterresourceset calico-cni -o yaml | grep -A 10 "status:"
-```
-
-**Résultat attendu:**
-```yaml
-status:
-  conditions:
-  - lastTransitionTime: "2025-XX-XXT..."
-    status: "True"
-    type: ResourcesApplied
-```
+**✅ Vérification:** Le label `cni=calico` est présent dans LABELS
 
 ---
 
-## 👀 Partie 5: Observer l'Installation Calico (3 minutes)
+### Action 8: Observer l'installation automatique de Calico
 
-### Observer les pods Calico apparaître
+**Objectif:** Voir en temps réel l'apparition des pods Calico dans le workload cluster
 
+**Commande:**
 ```bash
 watch -n 2 'kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system'
 ```
 
-**Progression attendue:**
+**Explication de la commande:**
+- `watch -n 2`: exécute la commande toutes les 2 secondes et affiche le résultat
+- `-n kube-system`: limite l'affichage au namespace système où Calico se déploie
+
+**Résultat attendu (progression):**
 
 **Minute 1:**
 ```
@@ -229,9 +238,7 @@ NAME                                    READY   STATUS              RESTARTS
 calico-kube-controllers-xxx             0/1     ContainerCreating   0
 calico-node-aaaa                        0/1     Init:0/3            0
 calico-node-bbbb                        0/1     Init:0/3            0
-calico-node-cccc                        0/1     Init:0/3            0
 coredns-xxx                             0/1     Pending             0
-coredns-yyy                             0/1     Pending             0
 ```
 
 **Minute 2:**
@@ -240,39 +247,29 @@ NAME                                    READY   STATUS    RESTARTS
 calico-kube-controllers-xxx             1/1     Running   0
 calico-node-aaaa                        1/1     Running   0
 calico-node-bbbb                        1/1     Running   0
-calico-node-cccc                        1/1     Running   0
 coredns-xxx                             1/1     Running   0
-coredns-yyy                             1/1     Running   0
 ```
 
-**✅ Tous les pods Running!**
+**✅ Vérification:** Tous les pods Calico (calico-node DaemonSet + calico-kube-controllers) sont Running. CoreDNS passe aussi à Running car il peut maintenant obtenir une IP réseau. Appuyez sur Ctrl+C pour arrêter.
 
-**Appuyez sur Ctrl+C pour arrêter.**
+---
 
-### Pods Calico Déployés
+### Action 9: Observer les nodes passer à Ready
 
-| Pod | Rôle | Déploiement |
-|-----|------|-------------|
-| **calico-node** | CNI agent sur chaque node | DaemonSet (1 pod/node) |
-| **calico-kube-controllers** | Controller pour les policies | Deployment (1 replica) |
+**Objectif:** Confirmer que les nodes détectent le CNI et passent à Ready
 
-### Observer les nodes passer à Ready
-
+**Commande:**
 ```bash
 watch -n 2 'kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get nodes'
 ```
 
-**Progression:**
+**Explication de la commande:**
+- `watch -n 2`: rafraîchit l'affichage toutes les 2 secondes
+- `get nodes`: affiche l'état des nodes
 
-**Avant:**
-```
-NAME                              STATUS     ROLES           AGE
-dev-cluster-control-plane-xxxx    NotReady   control-plane   10m
-dev-cluster-md-0-yyyyy-zzzzz      NotReady   <none>          9m
-dev-cluster-md-0-yyyyy-aaaaa      NotReady   <none>          9m
-```
+**Résultat attendu (progression):**
 
-**Après (~1 minute):**
+**Avant (~1 minute):**
 ```
 NAME                              STATUS   ROLES           AGE
 dev-cluster-control-plane-xxxx    Ready    control-plane   11m
@@ -280,57 +277,51 @@ dev-cluster-md-0-yyyyy-zzzzz      Ready    <none>          10m
 dev-cluster-md-0-yyyyy-aaaaa      Ready    <none>          10m
 ```
 
-**✅ 3/3 nodes Ready!**
+**✅ Vérification:** 3/3 nodes sont Ready. Le CNI est fonctionnel. Appuyez sur Ctrl+C.
 
 ---
 
-## ✅ Partie 6: Validation Finale (1 minute)
+### Action 10: Tester la communication réseau
 
-### Tester la communication réseau
+**Objectif:** Valider que les pods peuvent obtenir des IPs et communiquer
 
-Déployer un pod de test:
-
+**Commande:**
 ```bash
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig run test-pod --image=nginx --restart=Never
-```
-
-Attendre que le pod soit Running:
-
-```bash
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pod test-pod
-```
-
-**Résultat:**
-```
-NAME       READY   STATUS    RESTARTS   AGE
-test-pod   1/1     Running   0          10s
-```
-
-Vérifier l'IP du pod (assignée par Calico):
-
-```bash
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pod test-pod -o wide
 ```
 
-**Résultat:**
+**Explication de la commande:**
+- `run test-pod`: crée un pod simple avec nginx
+- `--restart=Never`: crée un pod simple (pas un Deployment)
+- `get pod -o wide`: affiche les détails incluant l'IP assignée
+
+**Résultat attendu:**
 ```
 NAME       READY   STATUS    RESTARTS   AGE   IP              NODE
 test-pod   1/1     Running   0          20s   192.168.X.Y     dev-cluster-md-0-...
 ```
 
-**✅ Pod a une IP du range 192.168.0.0/16 (configuré dans dev-cluster.yaml)!**
+**✅ Vérification:** Le pod a une IP du range 192.168.0.0/16 (défini dans dev-cluster.yaml). Le réseau fonctionne.
 
-### Cleanup du pod de test
-
+**Cleanup:**
 ```bash
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig delete pod test-pod
 ```
 
-### Exécuter le script de validation
+---
 
+### Action 11: Validation automatique du module
+
+**Objectif:** Vérifier que toutes les étapes sont réussies
+
+**Commande:**
 ```bash
 ./validation.sh
 ```
+
+**Explication de la commande:**
+- Script qui vérifie : CRS existe, label appliqué, pods Calico Running, nodes Ready
 
 **Résultat attendu:**
 ```
@@ -342,11 +333,8 @@ kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig delete pod tes
 ✅ Cluster dev-cluster a le label cni=calico
 ✅ CRS appliqué sur le cluster
 ✅ Calico pods Running (4/4)
-   - calico-kube-controllers: 1/1
-   - calico-node DaemonSet: 3/3
 ✅ 3/3 nodes Ready
 ✅ CoreDNS pods Running (2/2)
-✅ Communication réseau fonctionnelle
 
 ===========================================
 🎉 Module 02 terminé avec succès!
@@ -354,62 +342,95 @@ kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig delete pod tes
 ===========================================
 ```
 
+**✅ Vérification:** Tous les checks passent. Le réseau est fonctionnel.
+
 ---
 
-## 📚 Résumé des Concepts
+## 💡 Comprendre en Profondeur
 
-| Concept | Description | Exemple |
-|---------|-------------|---------|
-| **CNI** | Container Network Interface - plugin réseau pod | Calico, Flannel, Cilium |
-| **ClusterResourceSet** | Déploiement automatique d'addons | CRS pour Calico, CSI, etc. |
-| **clusterSelector** | Sélection de clusters par labels | `cni: calico` |
-| **ConfigMap** | Stockage des manifestes à déployer | calico-addon |
-| **DaemonSet** | Pod sur chaque node | calico-node |
+### Pourquoi CoreDNS était Pending avant Calico ?
+
+CoreDNS est un pod qui nécessite une IP réseau pour fonctionner. Sans CNI :
+- Le scheduler ne peut pas assigner d'IP au pod
+- Les routes réseau n'existent pas
+- Le pod reste en Pending
+
+Dès que Calico est installé :
+- Le CNI assigne une IP du range configuré
+- Les routes sont créées automatiquement
+- CoreDNS peut démarrer et fournir le DNS au cluster
+
+**Ordre critique:** CNI AVANT tout autre addon réseau.
+
+---
+
+### ClusterResourceSet : ApplyOnce vs Reconcile
+
+Deux stratégies d'application :
+
+**ApplyOnce (utilisé ici):**
+- Appliqué une seule fois au moment du match
+- Modifications ultérieures du CRS ne sont pas propagées
+- Convient pour addons gérés indépendamment après installation
+
+**Reconcile:**
+- Réappliqué régulièrement pour forcer la configuration
+- Modifications du CRS propagées automatiquement
+- Convient pour garantir la conformité continue
+
+---
+
+### Pattern Label-Based : Flexibilité GitOps
+
+Le sélecteur par labels permet des stratégies flexibles :
+
+```yaml
+# Exemple : tous les clusters production ET Europe
+clusterSelector:
+  matchLabels:
+    environment: production
+    region: europe
+```
+
+**Avantages :**
+- Self-service : équipes dev ajoutent un label = addon déployé
+- Gouvernance : équipes platform contrôlent les CRS
+- Évolutivité : 1 CRS pour 100+ clusters
+
+---
+
+### Calico : Plus qu'un CNI
+
+Calico offre également :
+- **Network Policies :** Firewall pod-to-pod (sécurité)
+- **BGP routing :** Routage avancé pour on-premise
+- **Observability :** Métriques réseau détaillées
 
 ---
 
 ## 🔍 Troubleshooting
 
-### Calico pods ne démarrent pas
+**Pods Calico ne démarrent pas :**
 ```bash
-# Vérifier les events
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get events -n kube-system --sort-by='.lastTimestamp'
-
-# Logs d'un pod Calico
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig logs -n kube-system calico-node-xxx
 ```
 
-### CRS ne s'applique pas
+**CRS ne s'applique pas :**
 ```bash
-# Vérifier le label du cluster
+# Vérifier le label
 kubectl get cluster dev-cluster --show-labels
-
-# Si label manquant
-kubectl label cluster dev-cluster cni=calico
 
 # Logs du CRS controller
 kubectl logs -n capi-system deployment/capi-controller-manager | grep clusterresourceset
 ```
 
-### Nodes restent NotReady
+**Nodes restent NotReady :**
 ```bash
 # Attendre 1-2 minutes après installation Calico
-
 # Vérifier que tous les pods Calico sont Running
 kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system -l k8s-app=calico-node
-
-# Si problème persiste, restart kubelet (automatique dans Docker provider)
 ```
-
----
-
-## 🎓 Ce Que Vous Avez Appris
-
-✅ Diagnostiquer un problème de CNI manquant
-✅ Comprendre ClusterResourceSets pour automation
-✅ Déployer Calico automatiquement sur un cluster
-✅ Utiliser les labels pour déclencher des actions
-✅ Valider que le réseau pod fonctionne
 
 ---
 
@@ -417,16 +438,10 @@ kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -n ku
 
 **Module 03 (15 min):** k0smotron Control Planes Virtuels
 - Comprendre les économies de ressources (55%)
-- Créer un cluster k0smotron équivalent
-- Comparer les métriques avec Docker provider
+- Créer un cluster k0smotron
+- Comparer avec Docker provider
 
 ```bash
 cd ../03-k0smotron
 cat commands.md
 ```
-
----
-
-**Module 02 complété! 🎉**
-**Temps écoulé:** 40/90 minutes (10+15+15)
-**Prochaine étape:** Module 03 - k0smotron Control Planes

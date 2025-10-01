@@ -9,10 +9,11 @@ Ce guide détaille l'installation et la configuration de l'infrastructure néces
 | Composant | Version | Rôle |
 |-----------|---------|------|
 | **Docker** | 24.0+ | Runtime pour nodes Kubernetes (kind containers) |
-| **kubectl** | 1.28+ | Interface avec clusters Kubernetes |
-| **kind** | 0.20+ | Création management cluster local |
-| **clusterctl** | 1.5+ | CLI ClusterAPI pour lifecycle clusters |
-| **helm** | 3.12+ | Package manager pour Helm Addon Provider |
+| **kubectl** | 1.32.8+ | Interface avec clusters Kubernetes |
+| **kind** | 0.30+ | Création management cluster local |
+| **clusterctl** | 1.11+ | CLI ClusterAPI pour lifecycle clusters |
+| **helm** | 3.19+ | Package manager pour Helm Addon Provider |
+| **tree** | 1.8+ | Visualisation arborescente de répertoires |
 
 ### Setup Options Overview
 
@@ -29,6 +30,94 @@ Ce guide détaille l'installation et la configuration de l'infrastructure néces
 **Contexte:** Développement individual, tests, formation personnelle
 **Durée:** 20 minutes
 **Resources:** 8GB RAM, 4 CPU cores, 30GB disk
+
+### System Limits Configuration (CRITICAL)
+
+**⚠️ IMPORTANT:** Avant d'installer les outils, configurez les limites système pour éviter les erreurs.
+
+#### Automated Configuration (Recommended)
+
+```bash
+cd workshop-express/00-introduction
+./configure-system-limits.sh
+```
+
+#### Manual Configuration
+
+**Linux:**
+```bash
+# Kernel limits
+echo "fs.inotify.max_user_watches=524288" | sudo tee -a /etc/sysctl.conf
+echo "fs.inotify.max_user_instances=512" | sudo tee -a /etc/sysctl.conf
+echo "fs.file-max=2097152" | sudo tee -a /etc/sysctl.conf
+echo "kernel.pid_max=4194304" | sudo tee -a /etc/sysctl.conf
+echo "kernel.threads-max=4194304" | sudo tee -a /etc/sysctl.conf
+echo "net.core.somaxconn=32768" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# User limits
+cat << EOF | sudo tee -a /etc/security/limits.conf
+*    soft    nofile     1048576
+*    hard    nofile     1048576
+*    soft    nproc      unlimited
+*    hard    nproc      unlimited
+*    soft    memlock    unlimited
+*    hard    memlock    unlimited
+EOF
+
+# Docker systemd limits
+sudo mkdir -p /etc/systemd/system/docker.service.d
+cat << EOF | sudo tee /etc/systemd/system/docker.service.d/limits.conf
+[Service]
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+EOF
+```
+
+**macOS:**
+```bash
+# Session limits
+sudo launchctl limit maxfiles 1048576 1048576
+
+# Permanent configuration
+cat << 'EOF' | sudo tee /Library/LaunchDaemons/limit.maxfiles.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>limit.maxfiles</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>launchctl</string>
+      <string>limit</string>
+      <string>maxfiles</string>
+      <string>1048576</string>
+      <string>1048576</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+  </dict>
+</plist>
+EOF
+sudo launchctl load -w /Library/LaunchDaemons/limit.maxfiles.plist
+```
+
+**Verification:**
+```bash
+# Linux
+ulimit -n          # Should show: 1048576
+sudo sysctl fs.inotify.max_user_watches  # Should show: 524288
+
+# macOS
+launchctl limit maxfiles  # Should show: 1048576
+```
+
+**⚠️ REBOOT or LOGOUT/LOGIN required for limits to take effect!**
+
+---
 
 ### Prerequisites Installation
 
@@ -141,7 +230,7 @@ winget install Kubernetes.kubectl
 **Linux:**
 ```bash
 # Download latest version
-[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-linux-amd64
 chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
 
@@ -155,8 +244,8 @@ kind version
 brew install kind
 
 # Or manual download
-[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-darwin-amd64
-[ $(uname -m) = arm64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-darwin-arm64
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-darwin-amd64
+[ $(uname -m) = arm64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.30.0/kind-darwin-arm64
 chmod +x ./kind
 sudo mv ./kind /usr/local/bin/kind
 ```
@@ -167,7 +256,7 @@ sudo mv ./kind /usr/local/bin/kind
 choco install kind
 
 # Or download manually
-curl.exe -Lo kind-windows-amd64.exe https://kind.sigs.k8s.io/dl/v0.20.0/kind-windows-amd64
+curl.exe -Lo kind-windows-amd64.exe https://kind.sigs.k8s.io/dl/v0.30.0/kind-windows-amd64
 Move-Item .\kind-windows-amd64.exe c:\some-dir-in-your-PATH\kind.exe
 ```
 
@@ -175,7 +264,7 @@ Move-Item .\kind-windows-amd64.exe c:\some-dir-in-your-PATH\kind.exe
 
 **Linux:**
 ```bash
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.3/clusterctl-linux-amd64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-linux-amd64 -o clusterctl
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
 
@@ -186,9 +275,9 @@ clusterctl version
 **macOS:**
 ```bash
 # Intel Mac
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.3/clusterctl-darwin-amd64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-darwin-amd64 -o clusterctl
 # Apple Silicon Mac
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.3/clusterctl-darwin-arm64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-darwin-arm64 -o clusterctl
 
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
@@ -196,7 +285,7 @@ sudo mv ./clusterctl /usr/local/bin/clusterctl
 
 **Windows:**
 ```powershell
-curl.exe -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.5.3/clusterctl-windows-amd64.exe -o clusterctl.exe
+curl.exe -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-windows-amd64.exe -o clusterctl.exe
 # Move to PATH directory
 ```
 
@@ -267,7 +356,7 @@ kubectl cluster-info --context kind-capi-management
 **Expected Output:**
 ```
 Creating cluster "capi-management" ...
- ✓ Ensuring node image (kindest/node:v1.28.3) 🖼
+ ✓ Ensuring node image (kindest/node:v1.32.9) 🖼
  ✓ Preparing nodes 📦
  ✓ Writing configuration 📜
  ✓ Starting control-plane 🕹️
@@ -299,12 +388,12 @@ kubectl get pods -A | grep -E "(capi|capd)"
 **Expected Output:**
 ```
 Fetching providers
-Installing cert-manager Version="v1.12.2"
+Installing cert-manager Version="v1.18.2"
 Waiting for cert-manager to be available...
-Installing Provider="cluster-api" Version="v1.5.3" TargetNamespace="capi-system"
-Installing Provider="bootstrap-kubeadm" Version="v1.5.3" TargetNamespace="capi-kubeadm-bootstrap-system"
-Installing Provider="control-plane-kubeadm" Version="v1.5.3" TargetNamespace="capi-kubeadm-control-plane-system"
-Installing Provider="infrastructure-docker" Version="v1.5.3" TargetNamespace="capd-system"
+Installing Provider="cluster-api" Version="v1.11.1" TargetNamespace="capi-system"
+Installing Provider="bootstrap-kubeadm" Version="v1.11.1" TargetNamespace="capi-kubeadm-bootstrap-system"
+Installing Provider="control-plane-kubeadm" Version="v1.11.1" TargetNamespace="capi-kubeadm-control-plane-system"
+Installing Provider="infrastructure-docker" Version="v1.11.1" TargetNamespace="capd-system"
 
 Your management cluster has been initialized successfully!
 ```
@@ -312,8 +401,8 @@ Your management cluster has been initialized successfully!
 #### 3. Install k0smotron Operator
 
 ```bash
-# Install k0smotron v1.8.0
-kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.8.0/install.yaml
+# Install k0smotron v1.7.0
+kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.7.0/install.yaml
 
 # Wait for operator to be ready
 kubectl wait --for=condition=Available --timeout=300s \
@@ -376,9 +465,9 @@ cd workshop-express/00-introduction
 
 ✅ kubectl accessible
 ✅ Management cluster accessible
-✅ ClusterAPI installé (v1.5.3)
+✅ ClusterAPI installé (v1.11.1)
 ✅ Docker provider ready
-✅ k0smotron operator running (v1.8.0)
+✅ k0smotron operator running (v1.7.0)
 ✅ Helm provider ready
 
 ======================================
@@ -468,7 +557,7 @@ kubectl get nodes
 clusterctl init --infrastructure aws
 
 # Install k0smotron
-kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.8.0/install.yaml
+kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.7.0/install.yaml
 
 # Install Helm provider
 helm repo add capi-addon-provider https://kubernetes-sigs.github.io/cluster-api-addon-provider-helm
@@ -813,7 +902,7 @@ kind create cluster --config management-cluster-config.yaml
 curl -I https://github.com/kubernetes-sigs/cluster-api/releases
 
 # Use specific version if latest fails
-clusterctl init --infrastructure docker --core cluster-api:v1.5.3
+clusterctl init --infrastructure docker --core cluster-api:v1.11.1
 
 # Check controller logs
 kubectl logs -n capi-system deployment/capi-controller-manager
@@ -825,7 +914,7 @@ kubectl logs -n capi-system deployment/capi-controller-manager
 kubectl get pods -n cert-manager
 
 # Manual cert-manager install if needed
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.2/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.yaml
 ```
 
 #### k0smotron Operator Issues
@@ -1149,4 +1238,4 @@ done
 
 **Setup Guide complet! Ready for Workshop ClusterAPI Express! 🚀**
 
-*Guide Setup v1.0 - Compatible avec ClusterAPI v1.5.3 | k0smotron v1.8.0 | Kubernetes v1.28+*
+*Guide Setup v1.0 - Compatible avec ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32.9 | Helm v3.19.0*

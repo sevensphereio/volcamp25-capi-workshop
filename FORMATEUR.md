@@ -27,10 +27,10 @@
 
 **Infrastructure Management Cluster:**
 - [ ] Cluster kind opérationnel avec config ports (30080)
-- [ ] ClusterAPI v1.5.3 installé et testé
+- [ ] ClusterAPI v1.11.1 installé et testé
 - [ ] Docker Provider initialisé et fonctionnel
-- [ ] k0smotron operator v1.8.0 déployé
-- [ ] Helm Addon Provider installé et testé
+- [ ] k0smotron operator v1.7.0 déployé
+- [ ] Helm Addon Provider v0.3.2 installé et testé
 - [ ] Tous les pods en status Running
 - [ ] Script `setup-infrastructure.sh` testé
 
@@ -47,9 +47,11 @@
 - [ ] Docker 24.0+ avec 8GB+ disponible
 - [ ] Internet stable 100Mbps+ (pour pulls images)
 - [ ] Ports 30080 libres pour load balancer
-- [ ] kubectl, kind, clusterctl, helm dans PATH
+- [ ] kubectl, kind, clusterctl, helm, tree dans PATH
 - [ ] `watch` command disponible
 - [ ] Monitoring scripts testés
+- [ ] ⚠️ **LIMITES SYSTÈME CONFIGURÉES** (fs.inotify, ulimit -n, Docker limits)
+- [ ] Vérification: `ulimit -n` = 1048576, `sudo sysctl fs.inotify.max_user_watches` = 524288
 
 ### 🎤 Matériel de Présentation
 
@@ -79,13 +81,15 @@ Demain [HEURE], nous démarrons le Workshop ClusterAPI Express (90 min).
 🔧 PRÉREQUIS TECHNIQUES:
 - Ordinateur portable avec admin rights
 - Docker Desktop installé et démarré
-- kubectl, kind, clusterctl, helm installés
+- kubectl, kind, clusterctl, helm, tree installés
 - Terminal ou IDE avec bon terminal
 - 8GB+ RAM libres, 30GB+ disk, Internet stable
+- ⚠️ LIMITES SYSTÈME CONFIGURÉES (CRITIQUE!)
 
 📋 VÉRIFICATION:
 - Test Docker: `docker run hello-world`
 - Test kubectl: `kubectl version --client`
+- Test limites: `ulimit -n` (devrait afficher 1048576)
 
 📥 RESSOURCES:
 - Guide installation: [LIEN SETUP.md]
@@ -768,4 +772,4 @@ kubectl delete namespace workshop-participant-*
 **Bonne chance pour votre workshop! 🚀**
 
 *Guide formateur v1.0 - Workshop ClusterAPI Express*
-*Basé sur 50+ sessions de formation avec 1000+ participants*
+*Basé sur ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32+*

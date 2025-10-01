@@ -92,6 +92,9 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: capi-management
 nodes:
   - role: control-plane
+    extraMounts:
+      - hostPath: /var/run/docker.sock
+        containerPath: /var/run/docker.sock
     extraPortMappings:
       - containerPort: 30080
         hostPort: 30080
@@ -110,6 +113,22 @@ kind create cluster --config /tmp/management-cluster-config.yaml
 # Verify cluster is ready
 kubectl cluster-info --context kind-capi-management
 echo "✅ Cluster de management créé"
+
+# Verify Docker socket is mounted
+echo ""
+echo "🔍 Vérification de la socket Docker..."
+if docker exec capi-management-control-plane test -S /var/run/docker.sock 2>/dev/null; then
+    echo "✅ Socket Docker montée et accessible"
+    if docker exec capi-management-control-plane docker ps &>/dev/null; then
+        echo "✅ Communication avec Docker Daemon fonctionnelle"
+    else
+        echo "⚠️  Socket montée mais communication échoue"
+    fi
+else
+    echo "❌ Socket Docker NON montée - CAPD ne pourra pas créer de clusters"
+    echo "   Vérifiez la configuration: extraMounts dans management-cluster-config.yaml"
+    exit 1
+fi
 
 echo ""
 
@@ -141,11 +160,11 @@ echo "🔧 Installation de l'opérateur k0smotron..."
 # Check if already installed
 if kubectl get namespace k0smotron &>/dev/null; then
     echo "⚠️  k0smotron déjà installé, mise à jour..."
-    kubectl delete -f https://github.com/k0sproject/k0smotron/releases/download/v1.8.0/install.yaml --ignore-not-found
+    kubectl delete -f https://github.com/k0sproject/k0smotron/releases/download/v1.7.0/install.yaml --ignore-not-found
     sleep 5
 fi
 
-kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.8.0/install.yaml
+kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.7.0/install.yaml
 
 wait_for_deployment k0smotron k0smotron-controller-manager
 
@@ -250,10 +269,10 @@ echo "========================================="
 echo ""
 echo "📊 Résumé de l'installation:"
 echo "  ✅ Management cluster: kind-capi-management"
-echo "  ✅ ClusterAPI: v1.5.3"
+echo "  ✅ ClusterAPI: v1.11.1"
 echo "  ✅ Docker Provider: Opérationnel"
-echo "  ✅ k0smotron: v1.8.0"
-echo "  ✅ Helm Addon Provider: Opérationnel"
+echo "  ✅ k0smotron: v1.7.0"
+echo "  ✅ Helm Addon Provider: v0.3.2"
 echo ""
 echo "🚀 Prêt pour le workshop!"
 echo ""

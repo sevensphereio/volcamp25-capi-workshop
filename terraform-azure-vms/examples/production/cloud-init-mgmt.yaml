@@ -1,0 +1,47 @@
+#cloud-config
+# Cloud-init configuration for CAPI management node
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - kubectl
+  - git
+  - curl
+  - jq
+  - make
+
+runcmd:
+  # Configure Docker
+  - systemctl enable docker
+  - systemctl start docker
+  - usermod -aG docker azureuser
+
+  # Install kind (Kubernetes in Docker)
+  - curl -Lo /usr/local/bin/kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+  - chmod +x /usr/local/bin/kind
+
+  # Install clusterctl
+  - curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-linux-amd64 -o /usr/local/bin/clusterctl
+  - chmod +x /usr/local/bin/clusterctl
+
+  # Install kubectl
+  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  - rm kubectl
+
+  # Format and mount data disk
+  - mkfs.ext4 /dev/disk/azure/scsi1/lun0
+  - mkdir -p /var/lib/etcd
+  - mount /dev/disk/azure/scsi1/lun0 /var/lib/etcd
+  - echo "/dev/disk/azure/scsi1/lun0 /var/lib/etcd ext4 defaults,nofail 0 2" >> /etc/fstab
+
+write_files:
+  - path: /etc/sysctl.d/99-kubernetes.conf
+    content: |
+      net.bridge.bridge-nf-call-iptables  = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.ipv4.ip_forward                 = 1
+
+final_message: "CAPI Management node initialization complete. System is ready after $UPTIME seconds"

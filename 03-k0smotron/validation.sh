@@ -21,6 +21,24 @@ warning() {
     echo "⚠️  $1"
 }
 
+# Check if k0smotron operator is installed
+kubectl get namespace k0smotron &>/dev/null
+check "k0smotron opérateur installé (namespace k0smotron existe)"
+
+kubectl get deployment -n k0smotron k0smotron-controller-manager &>/dev/null
+check "k0smotron controller-manager déployé"
+
+K0S_READY=$(kubectl get deployment -n k0smotron k0smotron-controller-manager -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
+K0S_DESIRED=$(kubectl get deployment -n k0smotron k0smotron-controller-manager -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "1")
+if [ "$K0S_READY" == "$K0S_DESIRED" ] && [ "$K0S_READY" != "0" ]; then
+    check "k0smotron controller-manager Running ($K0S_READY/$K0S_DESIRED ready)"
+else
+    echo "❌ k0smotron controller-manager: $K0S_READY/$K0S_DESIRED ready"
+    FAILED=$((FAILED + 1))
+fi
+
+echo ""
+
 # Check if k0s-demo-cluster exists
 kubectl get cluster k0s-demo-cluster &>/dev/null
 check "Cluster k0s-demo-cluster existe"

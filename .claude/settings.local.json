@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(for i in {00..07})",
+      "Bash(do echo \"=== Module $i ===\")",
+      "Bash(grep:*)",
+      "Bash(done)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

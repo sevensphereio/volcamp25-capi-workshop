@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🔍 Module 05: Validation Operations & Cleanup"
+echo "🔍 Module 07: Validation Operations & Cleanup"
 echo "============================================="
 echo ""
 

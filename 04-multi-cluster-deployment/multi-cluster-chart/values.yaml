@@ -1,0 +1,29 @@
+# Default values for multi-cluster deployment
+
+# List of clusters to deploy simultaneously
+clusters:
+  - name: multi-01
+    controlPlaneReplicas: 1
+    workerReplicas: 2
+    kubernetesVersion: v1.32.8
+    podCIDR: 192.168.0.0/16
+    serviceCIDR: 10.128.0.0/12
+
+  - name: multi-02
+    controlPlaneReplicas: 1
+    workerReplicas: 2
+    kubernetesVersion: v1.32.8
+    podCIDR: 192.168.0.0/16
+    serviceCIDR: 10.128.0.0/12
+
+  - name: multi-03
+    controlPlaneReplicas: 1
+    workerReplicas: 2
+    kubernetesVersion: v1.32.8
+    podCIDR: 192.168.0.0/16
+    serviceCIDR: 10.128.0.0/12
+
+# Default labels applied to all clusters
+defaultLabels:
+  environment: demo
+  managed-by: helm
