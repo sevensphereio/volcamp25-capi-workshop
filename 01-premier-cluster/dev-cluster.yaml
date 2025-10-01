@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: ClusterClass
 metadata:
   name: quick-start
@@ -16,16 +16,16 @@ spec:
           type: Ready
     machineInfrastructure:
       templateRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
         name: quick-start-control-plane
     templateRef:
-      apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta1
       kind: KubeadmControlPlaneTemplate
       name: quick-start-control-plane
   infrastructure:
     templateRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: DockerClusterTemplate
       name: quick-start-cluster
   patches:
@@ -36,7 +36,7 @@ spec:
         valueFrom:
           variable: imageRepository
       selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -52,7 +52,7 @@ spec:
             local:
               imageTag: {{ .etcdImageTag }}
       selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -67,7 +67,7 @@ spec:
           template: |
             imageTag: {{ .coreDNSImageTag }}
       selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -82,7 +82,7 @@ spec:
           template: |
             kindest/node:{{ .builtin.machineDeployment.version | replace "+" "_" }}
       selector:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
         matchResources:
           machineDeploymentClass:
@@ -95,7 +95,7 @@ spec:
           template: |
             kindest/node:{{ .builtin.machinePool.version | replace "+" "_" }}
       selector:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachinePoolTemplate
         matchResources:
           machinePoolClass:
@@ -108,7 +108,7 @@ spec:
           template: |
             kindest/node:{{ .builtin.controlPlane.version | replace "+" "_" }}
       selector:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
         matchResources:
           controlPlane: true
@@ -155,7 +155,7 @@ spec:
                       namespaces: [kube-system]
               path: /etc/kubernetes/kube-apiserver-admission-pss.yaml
       selector:
-        apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
         kind: KubeadmControlPlaneTemplate
         matchResources:
           controlPlane: true
@@ -218,7 +218,7 @@ spec:
     machineDeployments:
     - bootstrap:
         templateRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
           kind: KubeadmConfigTemplate
           name: quick-start-default-worker-bootstraptemplate
       class: default-worker
@@ -233,23 +233,23 @@ spec:
             type: Ready
       infrastructure:
         templateRef:
-          apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+          apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
           kind: DockerMachineTemplate
           name: quick-start-default-worker-machinetemplate
     machinePools:
     - bootstrap:
         templateRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
           kind: KubeadmConfigTemplate
           name: quick-start-default-worker-bootstraptemplate
       class: default-worker
       infrastructure:
         templateRef:
-          apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+          apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
           kind: DockerMachinePoolTemplate
           name: quick-start-default-worker-machinepooltemplate
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerClusterTemplate
 metadata:
   name: quick-start-cluster
@@ -258,7 +258,7 @@ spec:
   template:
     spec: {}
 ---
-apiVersion: controlplane.cluster.x-k8s.io/v1beta2
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlaneTemplate
 metadata:
   name: quick-start-control-plane
@@ -285,7 +285,7 @@ spec:
             - name: eviction-hard
               value: nodefs.available<0%,nodefs.inodesFree<0%,imagefs.available<0%
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
   name: quick-start-control-plane
@@ -297,7 +297,7 @@ spec:
       - containerPath: /var/run/docker.sock
         hostPath: /var/run/docker.sock
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
   name: quick-start-default-worker-machinetemplate
@@ -309,7 +309,7 @@ spec:
       - containerPath: /var/run/docker.sock
         hostPath: /var/run/docker.sock
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachinePoolTemplate
 metadata:
   name: quick-start-default-worker-machinepooltemplate
@@ -319,7 +319,7 @@ spec:
     spec:
       template: {}
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
 metadata:
   name: quick-start-default-worker-bootstraptemplate
@@ -333,7 +333,7 @@ spec:
           - name: eviction-hard
             value: nodefs.available<0%,nodefs.inodesFree<0%,imagefs.available<0%
 ---
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: dev-cluster

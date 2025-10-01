@@ -25,9 +25,32 @@ locals {
   generate_ssh_key = var.ssh_public_key == ""
   ssh_public_key   = local.generate_ssh_key ? tls_private_key.vm_ssh[0].public_key_openssh : var.ssh_public_key
 
+  # Determine deployment mode
+  using_vm_count = var.vm_count > 0
+  using_vm_instances = length(var.vm_instances) > 0
+
+  # Generate VM instances from count (simple mode)
+  vm_instances_from_count = local.using_vm_count ? {
+    for i in range(1, var.vm_count + 1) : format("vm-%02d", i) => {
+      name             = "${var.vm_name_prefix}-${format("%02d", i)}"
+      size             = var.default_vm_size
+      zone             = null
+      admin_username   = var.default_admin_username
+      enable_public_ip = var.enable_public_ip
+      os_disk_size_gb  = var.default_os_disk_size_gb
+      os_disk_type     = var.default_os_disk_type
+      data_disks       = []
+      custom_data      = null
+      tags             = {}
+    }
+  } : {}
+
+  # Merge both modes (vm_count takes precedence if both are set)
+  vm_instances_merged = local.using_vm_count ? local.vm_instances_from_count : var.vm_instances
+
   # VM instance processing
   vm_instances_normalized = {
-    for key, vm in var.vm_instances : key => {
+    for key, vm in local.vm_instances_merged : key => {
       name                       = vm.name
       size                       = coalesce(vm.size, var.default_vm_size)
       zone                       = vm.zone

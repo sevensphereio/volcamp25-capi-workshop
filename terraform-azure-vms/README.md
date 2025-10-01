@@ -144,6 +144,63 @@ Rôle recommandé: **Contributor** sur la subscription ou le Resource Group
 
 ## 🚀 Démarrage Rapide
 
+### Option 1: Déploiement Simple (10 VMs identiques)
+
+**Le moyen le plus rapide** pour déployer plusieurs VMs identiques :
+
+```hcl
+module "workshop_vms" {
+  source = "git::https://github.com/your-org/terraform-azure-vms.git"
+
+  project_name = "workshop"
+  environment  = "dev"
+  location     = "westeurope"
+
+  # Simple mode: Just specify the count!
+  vm_count       = 10
+  vm_name_prefix = "workshop-vm"
+
+  default_vm_size         = "Standard_B2s"
+  default_os_disk_size_gb = 50
+}
+```
+
+✅ Génère automatiquement : `workshop-vm-01`, `workshop-vm-02`, ..., `workshop-vm-10`
+✅ Toutes les VMs sont identiques en taille, disque et configuration
+✅ Parfait pour workshops, labs, environnements de test
+
+👉 **Voir [exemple complet](examples/simple-10-vms/)**
+
+### Option 2: Configuration Avancée (VMs personnalisées)
+
+Pour des VMs avec des configurations différentes :
+
+```hcl
+module "my_infrastructure" {
+  source = "git::https://github.com/your-org/terraform-azure-vms.git"
+
+  project_name = "my-project"
+  environment  = "dev"
+  location     = "westeurope"
+
+  vm_instances = {
+    vm1 = {
+      name             = "app-server-01"
+      size             = "Standard_B2s"
+      enable_public_ip = true
+      os_disk_size_gb  = 50
+    }
+
+    vm2 = {
+      name             = "app-server-02"
+      size             = "Standard_B2s"
+      enable_public_ip = true
+      os_disk_size_gb  = 50
+    }
+  }
+}
+```
+
 ### 1. Cloner ou Copier le Module
 
 ```bash
@@ -152,29 +209,7 @@ cd workshop-express/terraform-azure-vms
 
 ### 2. Créer un Fichier de Configuration
 
-Créez `terraform.tfvars`:
-
-```hcl
-project_name = "my-project"
-environment  = "dev"
-location     = "westeurope"
-
-vm_instances = {
-  vm1 = {
-    name             = "app-server-01"
-    size             = "Standard_B2s"
-    enable_public_ip = true
-    os_disk_size_gb  = 50
-  }
-
-  vm2 = {
-    name             = "app-server-02"
-    size             = "Standard_B2s"
-    enable_public_ip = true
-    os_disk_size_gb  = 50
-  }
-}
-```
+Créez `terraform.tfvars` avec l'une des deux options ci-dessus.
 
 ### 3. Déployer
 
@@ -212,7 +247,51 @@ terraform destroy
 
 ## 📚 Exemples
 
-### Exemple 1: Déploiement Basique (3 VMs)
+### Exemple 1: 10 VMs Identiques (Simple Mode) ⭐ RECOMMANDÉ
+
+**Use Case:** Workshop, formation, environnement de test
+
+```bash
+cd examples/simple-10-vms
+
+# Option 1: Configuration interactive (NOUVEAU !)
+./configure.sh  # Assistant pas-à-pas
+./deploy.sh     # Déploiement automatisé
+
+# Option 2: Configuration manuelle
+nano terraform.tfvars  # Modifier: nombre, taille, région, disque
+./deploy.sh            # Déploiement automatisé
+
+# Option 3: Terraform standard
+terraform init
+terraform apply
+```
+
+**Caractéristiques:**
+- ✅ **Personnalisation ultra-simple** via `terraform.tfvars`
+- ✅ **Changement du nombre** de VMs (1-100)
+- ✅ **Changement du nom** des VMs via `vm_name_prefix`
+- ✅ **Changement de la taille** (B1s, B2s, D2s_v3, D4s_v3, etc.)
+- ✅ **Changement de la taille du disque** (30-4095 GB)
+- ✅ **Changement de la région** (westeurope, francecentral, eastus, etc.)
+- ✅ Scripts automatisés : `configure.sh`, `deploy.sh`, `destroy.sh`, `list-vms.sh`
+- ✅ 8 exemples de configurations prêts à l'emploi
+- ✅ Déploiement en ~3-5 minutes
+
+**Fichiers disponibles:**
+- 📚 `README.md` - Documentation complète
+- 🚀 `QUICKSTART.md` - Démarrage en 5 minutes
+- 🗺️ `INDEX.md` - Guide complet de navigation
+- ✏️ `terraform.tfvars` - Configuration personnalisable
+- 💡 `terraform.tfvars.examples` - 8 exemples de configurations
+- 🎛️ `configure.sh` - Assistant de configuration interactive
+- ⚡ `deploy.sh` - Déploiement automatisé
+- 🗑️ `destroy.sh` - Destruction sécurisée
+- 📋 `list-vms.sh` - Gestion et listing des VMs
+
+👉 [Documentation complète](examples/simple-10-vms/README.md) | [Démarrage rapide](examples/simple-10-vms/QUICKSTART.md) | [Guide complet](examples/simple-10-vms/INDEX.md)
+
+### Exemple 2: Déploiement Basique (3 VMs)
 
 **Use Case:** Environnement de développement simple
 
@@ -248,7 +327,7 @@ vm_instances = {
 }
 ```
 
-### Exemple 2: Production avec Haute Disponibilité
+### Exemple 3: Production avec Haute Disponibilité
 
 **Use Case:** Environnement de production multi-zones avec Load Balancer
 

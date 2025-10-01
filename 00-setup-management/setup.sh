@@ -113,7 +113,7 @@ if kubectl get namespace capi-system &>/dev/null; then
 fi
 
 if ! kubectl get namespace capi-system &>/dev/null; then
-    clusterctl init --infrastructure docker
+    clusterctl init --infrastructure docker:v1.10.6
 
     if [ $? -eq 0 ]; then
         echo ""

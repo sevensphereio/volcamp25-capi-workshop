@@ -76,7 +76,7 @@ workshop-express/
 - **Progressive:** Difficulté croissante (intro → avancé)
 
 ### **2. Infrastructure Production-Ready**
-- **Management Cluster:** kind avec ClusterAPI v1.11.1
+- **Management Cluster:** kind avec ClusterAPI v1.10.6
 - **Providers:** Docker (CAPD) + k0smotron v1.7.0
 - **Addons:** Calico CNI v3.30.3 + Helm Addon Provider v0.3.2
 - **Automation:** ClusterResourceSets + HelmChartProxy
@@ -151,7 +151,7 @@ Chaque module a un script `validation.sh` qui vérifie:
 - **6 guides Markdown** détaillés
 
 ### **Technologies Couvertes**
-- ClusterAPI v1.11.1
+- ClusterAPI v1.10.6
 - Docker Provider (CAPD)
 - k0smotron v1.7.0
 - Calico CNI v3.30.3
@@ -299,7 +299,7 @@ Développé avec **ULTRATHINK methodology** pour une qualité maximale.
 **Workshop Express ClusterAPI - Version 1.0**
 **Status: PRODUCTION READY ✅**
 **Dernière mise à jour: 2025-09-30**
-**Versions: ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32+**
+**Versions: ClusterAPI v1.10.6 | k0smotron v1.7.0 | Kubernetes v1.32+**
 
 ---
 

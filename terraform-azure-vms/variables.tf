@@ -117,8 +117,25 @@ variable "additional_nsg_rules" {
 # COMPUTE CONFIGURATION
 # =============================================================================
 
+variable "vm_count" {
+  description = "Number of identical VMs to create (simple mode, mutually exclusive with vm_instances)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.vm_count >= 0 && var.vm_count <= 100
+    error_message = "VM count must be between 0 and 100"
+  }
+}
+
+variable "vm_name_prefix" {
+  description = "Prefix for VM names when using vm_count (will be suffixed with -01, -02, etc.)"
+  type        = string
+  default     = "vm"
+}
+
 variable "vm_instances" {
-  description = "Map of VM instances to create"
+  description = "Map of VM instances to create (advanced mode, mutually exclusive with vm_count)"
   type = map(object({
     name               = string
     size               = string
@@ -136,10 +153,11 @@ variable "vm_instances" {
     custom_data        = optional(string)
     tags               = optional(map(string))
   }))
+  default = {}
 
   validation {
-    condition     = length(var.vm_instances) > 0 && length(var.vm_instances) <= 100
-    error_message = "Must define between 1 and 100 VM instances"
+    condition     = length(var.vm_instances) >= 0 && length(var.vm_instances) <= 100
+    error_message = "Must define between 0 and 100 VM instances"
   }
 }
 

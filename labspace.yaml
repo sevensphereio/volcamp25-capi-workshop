@@ -1,0 +1,9 @@
+title: Labspace title
+description: |
+  The description of the Labspace, generally in 100 characters or less
+
+sections:
+  - title: Section One
+    contentPath: .labspace/section-one.md
+  - title: Section Two
+    contentPath: .labspace/section-two.md

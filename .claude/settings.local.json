@@ -11,7 +11,11 @@
       "Bash(for i in {00..07})",
       "Bash(do echo \"=== Module $i ===\")",
       "Bash(grep:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(mv:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Checking $dir:\")",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

@@ -27,7 +27,7 @@
 
 **Infrastructure Management Cluster:**
 - [ ] Cluster kind opérationnel avec config ports (30080)
-- [ ] ClusterAPI v1.11.1 installé et testé
+- [ ] ClusterAPI v1.10.6 installé et testé
 - [ ] Docker Provider initialisé et fonctionnel
 - [ ] k0smotron operator v1.7.0 déployé
 - [ ] Helm Addon Provider v0.3.2 installé et testé
@@ -772,4 +772,4 @@ kubectl delete namespace workshop-participant-*
 **Bonne chance pour votre workshop! 🚀**
 
 *Guide formateur v1.0 - Workshop ClusterAPI Express*
-*Basé sur ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32+*
+*Basé sur ClusterAPI v1.10.6 | k0smotron v1.7.0 | Kubernetes v1.32+*

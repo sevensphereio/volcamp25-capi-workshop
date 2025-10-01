@@ -47,7 +47,7 @@ kind create cluster --config management-cluster-config.yaml
 ```bash
 export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
-clusterctl init --infrastructure docker
+clusterctl init --infrastructure docker:v1.10.6
 ```
 
 ### 4. Vérifier Socket Docker
@@ -105,7 +105,9 @@ kind create cluster --config management-cluster-config.yaml
 curl -I https://github.com
 
 # Retry
-clusterctl init --infrastructure docker -v 5
+export CLUSTER_TOPOLOGY=true
+export EXP_CLUSTER_RESOURCE_SET=true
+clusterctl init --infrastructure docker:v1.10.6 -v 5
 ```
 
 ### Pods pas Ready

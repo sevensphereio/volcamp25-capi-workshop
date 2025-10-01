@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik_network
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # DNS Provider credentials (example for multiple providers)
+      # Uncomment and configure for your DNS provider
+
+      # Cloudflare
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+      # - CF_API_EMAIL=${CF_API_EMAIL}
+      # - CF_API_KEY=${CF_API_KEY}
+
+      # OVH
+      # - OVH_ENDPOINT=${OVH_ENDPOINT}
+      # - OVH_APPLICATION_KEY=${OVH_APPLICATION_KEY}
+      # - OVH_APPLICATION_SECRET=${OVH_APPLICATION_SECRET}
+      # - OVH_CONSUMER_KEY=${OVH_CONSUMER_KEY}
+
+      # Route53 (AWS)
+      # - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      # - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      # - AWS_REGION=${AWS_REGION}
+
+      # Google Cloud DNS
+      # - GCE_PROJECT=${GCE_PROJECT}
+      # - GCE_SERVICE_ACCOUNT_FILE=/run/secrets/gce_service_account
+
+      # Let's Encrypt configuration
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik.yml:/traefik.yml:ro
+      - ./config/dynamic.yml:/dynamic.yml:ro
+      - ./certs:/certs
+      - ./logs:/logs
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.tls.domains[0].main=${DOMAIN_NAME}"
+      - "traefik.http.routers.traefik.tls.domains[0].sans=*.${DOMAIN_NAME}"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH}"
+
+  # Example application service
+  whoami:
+    image: traefik/whoami
+    container_name: whoami
+    restart: unless-stopped
+    networks:
+      - traefik_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN_NAME}`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
+
+networks:
+  traefik_network:
+    driver: bridge

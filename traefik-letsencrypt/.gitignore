@@ -1,0 +1,14 @@
+# Environment variables
+.env
+
+# Certificates and sensitive data
+certs/
+!certs/.gitkeep
+
+# Logs
+logs/
+!logs/.gitkeep
+
+# Docker volumes
+*.pem
+acme.json

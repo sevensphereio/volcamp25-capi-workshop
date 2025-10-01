@@ -97,7 +97,7 @@ cd 00-introduction
 | `kubectl ns --help` | Affiche l'aide |
 | `kubectl slice --help` | Affiche l'aide |
 | `kubectl klock --help` | Affiche l'aide |
-| `clusterctl version` | Version >= v1.11.1 |
+| `clusterctl version` | Version >= v1.10.6 |
 | `helm version` | Version >= v3.19.0 |
 | `jq --version` | Version >= 1.6 |
 | `yq --version` | Version >= 4.44.6 |

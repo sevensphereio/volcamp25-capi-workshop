@@ -264,7 +264,7 @@ Move-Item .\kind-windows-amd64.exe c:\some-dir-in-your-PATH\kind.exe
 
 **Linux:**
 ```bash
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-linux-amd64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-linux-amd64 -o clusterctl
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
 
@@ -275,9 +275,9 @@ clusterctl version
 **macOS:**
 ```bash
 # Intel Mac
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-darwin-amd64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-darwin-amd64 -o clusterctl
 # Apple Silicon Mac
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-darwin-arm64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-darwin-arm64 -o clusterctl
 
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
@@ -285,7 +285,7 @@ sudo mv ./clusterctl /usr/local/bin/clusterctl
 
 **Windows:**
 ```powershell
-curl.exe -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-windows-amd64.exe -o clusterctl.exe
+curl.exe -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-windows-amd64.exe -o clusterctl.exe
 # Move to PATH directory
 ```
 
@@ -390,10 +390,10 @@ kubectl get pods -A | grep -E "(capi|capd)"
 Fetching providers
 Installing cert-manager Version="v1.18.2"
 Waiting for cert-manager to be available...
-Installing Provider="cluster-api" Version="v1.11.1" TargetNamespace="capi-system"
-Installing Provider="bootstrap-kubeadm" Version="v1.11.1" TargetNamespace="capi-kubeadm-bootstrap-system"
-Installing Provider="control-plane-kubeadm" Version="v1.11.1" TargetNamespace="capi-kubeadm-control-plane-system"
-Installing Provider="infrastructure-docker" Version="v1.11.1" TargetNamespace="capd-system"
+Installing Provider="cluster-api" Version="v1.10.6" TargetNamespace="capi-system"
+Installing Provider="bootstrap-kubeadm" Version="v1.10.6" TargetNamespace="capi-kubeadm-bootstrap-system"
+Installing Provider="control-plane-kubeadm" Version="v1.10.6" TargetNamespace="capi-kubeadm-control-plane-system"
+Installing Provider="infrastructure-docker" Version="v1.10.6" TargetNamespace="capd-system"
 
 Your management cluster has been initialized successfully!
 ```
@@ -465,7 +465,7 @@ cd workshop-express/00-introduction
 
 ✅ kubectl accessible
 ✅ Management cluster accessible
-✅ ClusterAPI installé (v1.11.1)
+✅ ClusterAPI installé (v1.10.6)
 ✅ Docker provider ready
 ✅ k0smotron operator running (v1.7.0)
 ✅ Helm provider ready
@@ -902,7 +902,7 @@ kind create cluster --config management-cluster-config.yaml
 curl -I https://github.com/kubernetes-sigs/cluster-api/releases
 
 # Use specific version if latest fails
-clusterctl init --infrastructure docker --core cluster-api:v1.11.1
+clusterctl init --infrastructure docker --core cluster-api:v1.10.6
 
 # Check controller logs
 kubectl logs -n capi-system deployment/capi-controller-manager
@@ -1238,4 +1238,4 @@ done
 
 **Setup Guide complet! Ready for Workshop ClusterAPI Express! 🚀**
 
-*Guide Setup v1.0 - Compatible avec ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32.9 | Helm v3.19.0*
+*Guide Setup v1.0 - Compatible avec ClusterAPI v1.10.6 | k0smotron v1.7.0 | Kubernetes v1.32.9 | Helm v3.19.0*

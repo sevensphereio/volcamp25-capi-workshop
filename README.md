@@ -2,7 +2,7 @@
 
 ## **De Zéro à Production : ClusterAPI et k0smotron en 2 Heures**
 
-[![ClusterAPI](https://img.shields.io/badge/ClusterAPI-v1.11.1-blue)](https://cluster-api.sigs.k8s.io/)
+[![ClusterAPI](https://img.shields.io/badge/ClusterAPI-v1.10.6-blue)](https://cluster-api.sigs.k8s.io/)
 [![k0smotron](https://img.shields.io/badge/k0smotron-v1.7.0-green)](https://k0smotron.io/)
 [![Duration](https://img.shields.io/badge/Duration-120%20minutes-orange)]()
 [![Format](https://img.shields.io/badge/Format-Hands--on%20Guided-success)]()
@@ -143,7 +143,7 @@ cat commands.md  # Instructions complètes
 
 Vous installerez:
 - ✅ Cluster kind de management
-- ✅ ClusterAPI v1.11.1 + Docker Provider
+- ✅ ClusterAPI v1.10.6 + Docker Provider
 - ✅ k0smotron operator v1.7.0
 - ✅ Helm Addon Provider v0.3.2
 - ✅ cert-manager
@@ -491,4 +491,4 @@ cat commands.md
 ---
 
 *Workshop Express ClusterAPI - Version 1.0*
-*Basé sur ClusterAPI v1.11.1 | k0smotron v1.7.0 | Kubernetes v1.32.8 | Helm v3.19.0*
+*Basé sur ClusterAPI v1.10.6 | k0smotron v1.7.0 | Kubernetes v1.32.8 | Helm v3.19.0*

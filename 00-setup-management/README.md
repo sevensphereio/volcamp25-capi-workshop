@@ -35,7 +35,7 @@ Le script `setup.sh` configure automatiquement les **feature gates ClusterAPI** 
    - Port 30080 exposé (pour tester les applications)
    - Labels et patches pour ingress et webhooks
 
-2. **ClusterAPI Core v1.11.1**
+2. **ClusterAPI Core v1.10.6**
    - Controllers principaux (Cluster, Machine, MachineDeployment)
    - Bootstrap Provider (kubeadm)
    - Control Plane Provider (kubeadm)
@@ -129,7 +129,7 @@ kind create cluster --config management-cluster-config.yaml
 # 2. Initialiser ClusterAPI + Docker Provider (avec feature gates)
 export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
-clusterctl init --infrastructure docker
+clusterctl init --infrastructure docker:v1.10.6
 
 # 3. Vérifier socket Docker
 ./verify-docker-socket.sh
@@ -185,7 +185,9 @@ clusterctl init --infrastructure docker
 # Recréer le cluster avec la bonne configuration
 kind delete cluster --name capi-management
 kind create cluster --config management-cluster-config.yaml
-clusterctl init --infrastructure docker
+export CLUSTER_TOPOLOGY=true
+export EXP_CLUSTER_RESOURCE_SET=true
+clusterctl init --infrastructure docker:v1.10.6
 ./verify-docker-socket.sh
 ```
 
@@ -212,7 +214,9 @@ curl -I https://github.com
 
 **Retry avec verbosité :**
 ```bash
-clusterctl init --infrastructure docker -v 5
+export CLUSTER_TOPOLOGY=true
+export EXP_CLUSTER_RESOURCE_SET=true
+clusterctl init --infrastructure docker:v1.10.6 -v 5
 ```
 
 ---

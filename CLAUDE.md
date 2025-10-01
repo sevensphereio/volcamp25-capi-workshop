@@ -28,7 +28,7 @@ The workshop consists of 8 progressive modules (00-07), each with:
 
 ### ClusterAPI Stack
 
-1. **ClusterAPI v1.11.1** - Core controllers for declarative cluster management
+1. **ClusterAPI v1.10.6** - Core controllers for declarative cluster management
 2. **Docker Provider (CAPD)** - Local development infrastructure provider
 3. **k0smotron v1.7.0** - Virtual control planes (55% resource savings)
 4. **Helm Addon Provider v0.3.2** - Multi-cluster application deployment via HelmChartProxy
@@ -249,7 +249,7 @@ kubectl get clusters --show-labels
 
 ## Version Information
 
-- ClusterAPI: v1.11.1
+- ClusterAPI: v1.10.6
 - k0smotron: v1.7.0
 - Kubernetes: v1.32.8
 - Calico CNI: v3.30.3

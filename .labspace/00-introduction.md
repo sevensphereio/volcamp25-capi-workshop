@@ -261,8 +261,8 @@ kubectl klock --help
 #### Linux
 
 ```bash
-# Télécharger clusterctl v1.11.1
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-linux-amd64 -o clusterctl
+# Télécharger clusterctl v1.10.6
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-linux-amd64 -o clusterctl
 
 # Rendre exécutable
 chmod +x ./clusterctl
@@ -281,12 +281,12 @@ clusterctl version
 brew install clusterctl
 
 # OU manuellement (Intel)
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-darwin-amd64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-darwin-amd64 -o clusterctl
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
 
 # OU manuellement (Apple Silicon)
-curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.11.1/clusterctl-darwin-arm64 -o clusterctl
+curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-darwin-arm64 -o clusterctl
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
 
@@ -752,7 +752,7 @@ source ~/.bashrc
 
 **Cause :** C'est normal ! clusterctl essaie de se connecter au management cluster
 
-**Vérification :** Tant que le numéro de version s'affiche (`v1.11.1`), l'outil est bien installé
+**Vérification :** Tant que le numéro de version s'affiche (`v1.10.6`), l'outil est bien installé
 
 ---
 

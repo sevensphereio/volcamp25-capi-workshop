@@ -55,7 +55,7 @@ Produit → Workload Clusters
 - `capi-kubeadm-bootstrap-controller` : Bootstrap nodes avec kubeadm
 - `capi-kubeadm-control-plane-controller` : Gestion control planes HA
 
-**Version :** v1.11.1
+**Version :** v1.10.6
 
 ---
 
@@ -70,6 +70,8 @@ Produit → Workload Clusters
 
 **Composant installé :**
 - `capd-controller-manager` : Crée containers Docker simulant des VMs
+
+**Version :** v1.10.6 (fixée pour cohérence)
 
 **⚠️ Production :** Remplacer par CAPA (AWS), CAPZ (Azure), CAPG (GCP)
 
@@ -88,21 +90,6 @@ Produit → Workload Clusters
 **Commande :**
 ```bash
 cd /home/volcampdev/workshop-express/00-setup-management
-cat > verify-tools.sh << 'EOF'
-#!/bin/bash
-echo "🔍 Vérification des outils..."
-for tool in docker kind kubectl clusterctl helm; do
-  if command -v $tool &> /dev/null; then
-    version=$($tool version 2>/dev/null | head -1 || echo "installé")
-    echo "✅ $tool: $version"
-  else
-    echo "❌ $tool: NON INSTALLÉ"
-    exit 1
-  fi
-done
-echo ""
-echo "✅ Tous les outils sont prêts!"
-EOF
 chmod +x verify-tools.sh
 ./verify-tools.sh
 ```
@@ -118,7 +105,7 @@ chmod +x verify-tools.sh
 ✅ docker: Docker version 27.4.0
 ✅ kind: kind v0.30.0
 ✅ kubectl: Client Version: v1.32.0
-✅ clusterctl: v1.11.1
+✅ clusterctl: v1.10.6
 ✅ helm: v3.19.0
 
 ✅ Tous les outils sont prêts!
@@ -134,30 +121,10 @@ chmod +x verify-tools.sh
 
 **Commande :**
 ```bash
-cat > management-cluster-config.yaml << 'EOF'
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-name: capi-management
-nodes:
-  - role: control-plane
-    extraMounts:
-      - hostPath: /var/run/docker.sock
-        containerPath: /var/run/docker.sock
-    extraPortMappings:
-      - containerPort: 30080
-        hostPort: 30080
-        protocol: TCP
-    kubeadmConfigPatches:
-      - |
-        kind: InitConfiguration
-        nodeRegistration:
-          kubeletExtraArgs:
-            node-labels: "ingress-ready=true"
-            authorization-mode: "Webhook"
-EOF
-
 kind create cluster --config management-cluster-config.yaml
 ```
+
+**Fichier de configuration :** Le fichier `management-cluster-config.yaml` est disponible dans le répertoire du module.
 
 **Explication de la configuration :**
 
@@ -238,19 +205,19 @@ capi-management-control-plane   Ready    control-plane   1m    v1.32.0
 ```bash
 export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
-clusterctl init --infrastructure docker
+clusterctl init --infrastructure docker:v1.10.6
 ```
 
 **Explication de la commande :**
 - `export CLUSTER_TOPOLOGY=true` : Active la feature gate Cluster Topology (ClusterClass)
 - `export EXP_CLUSTER_RESOURCE_SET=true` : Active la feature gate ClusterResourceSet (installation automatique d'addons)
 - `clusterctl init` : Commande d'initialisation ClusterAPI
-- `--infrastructure docker` : Spécifie le provider (CAPD)
+- `--infrastructure docker:v1.10.6` : Spécifie le provider (CAPD) avec version fixe v1.10.6
 - Installe automatiquement :
-  - ClusterAPI Core
-  - Kubeadm Bootstrap Provider
-  - Kubeadm Control Plane Provider
-  - Docker Infrastructure Provider
+  - ClusterAPI Core v1.10.6
+  - Kubeadm Bootstrap Provider v1.10.6
+  - Kubeadm Control Plane Provider v1.10.6
+  - Docker Infrastructure Provider v1.10.6
   - cert-manager (dépendance requise)
 
 **Résultat attendu :**
@@ -258,10 +225,10 @@ clusterctl init --infrastructure docker
 Fetching providers
 Installing cert-manager Version="v1.18.2"
 Waiting for cert-manager to be available...
-Installing Provider="cluster-api" Version="v1.11.1" TargetNamespace="capi-system"
-Installing Provider="bootstrap-kubeadm" Version="v1.11.1" TargetNamespace="capi-kubeadm-bootstrap-system"
-Installing Provider="control-plane-kubeadm" Version="v1.11.1" TargetNamespace="capi-kubeadm-control-plane-system"
-Installing Provider="infrastructure-docker" Version="v1.11.1" TargetNamespace="capd-system"
+Installing Provider="cluster-api" Version="v1.10.6" TargetNamespace="capi-system"
+Installing Provider="bootstrap-kubeadm" Version="v1.10.6" TargetNamespace="capi-kubeadm-bootstrap-system"
+Installing Provider="control-plane-kubeadm" Version="v1.10.6" TargetNamespace="capi-kubeadm-control-plane-system"
+Installing Provider="infrastructure-docker" Version="v1.10.6" TargetNamespace="capd-system"
 
 Your management cluster has been initialized successfully!
 
@@ -367,7 +334,7 @@ capd-system                        capd-controller-manager-xxx                  
 ✅ Tous les pods sont Running
 
 📊 Résumé des Composants:
-  ✅ ClusterAPI: v1.11.1
+  ✅ ClusterAPI: v1.10.6
   ✅ Docker Provider: Opérationnel
   ✅ cert-manager: v1.18.2
 
@@ -438,8 +405,8 @@ kubectl get deployment -n capi-system capi-controller-manager -o jsonpath='{.spe
 
 **Résultat :**
 ```
-clusterctl version: &version.Info{Major:"1", Minor:"11", GitVersion:"v1.11.1"}
-registry.k8s.io/cluster-api/cluster-api-controller:v1.11.1
+clusterctl version: &version.Info{Major:"1", Minor:"11", GitVersion:"v1.10.6"}
+registry.k8s.io/cluster-api/cluster-api-controller:v1.10.6
 ```
 
 ---
@@ -838,30 +805,11 @@ kubectl logs -n capd-system deployment/capd-controller-manager | grep -i "docker
 # Recréer le cluster avec la socket Docker montée
 kind delete cluster --name capi-management
 
-cat > management-cluster-config.yaml << 'EOF'
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-name: capi-management
-nodes:
-  - role: control-plane
-    extraMounts:
-      - hostPath: /var/run/docker.sock
-        containerPath: /var/run/docker.sock
-    extraPortMappings:
-      - containerPort: 30080
-        hostPort: 30080
-        protocol: TCP
-    kubeadmConfigPatches:
-      - |
-        kind: InitConfiguration
-        nodeRegistration:
-          kubeletExtraArgs:
-            node-labels: "ingress-ready=true"
-            authorization-mode: "Webhook"
-EOF
-
+# Le fichier management-cluster-config.yaml est dans le répertoire du module
 kind create cluster --config management-cluster-config.yaml
-clusterctl init --infrastructure docker
+export CLUSTER_TOPOLOGY=true
+export EXP_CLUSTER_RESOURCE_SET=true
+clusterctl init --infrastructure docker:v1.10.6
 ```
 
 **Vérification :**
@@ -903,7 +851,9 @@ clusterctl init --infrastructure docker --config clusterctl.yaml
 
 # Retry avec cleanup
 clusterctl delete --infrastructure docker --include-crd
-clusterctl init --infrastructure docker
+export CLUSTER_TOPOLOGY=true
+export EXP_CLUSTER_RESOURCE_SET=true
+clusterctl init --infrastructure docker:v1.10.6
 ```
 
 ---
@@ -931,59 +881,7 @@ clusterctl init --infrastructure docker
 
 **Commande Unique de Validation :**
 ```bash
-cat > full-check.sh << 'EOF'
-#!/bin/bash
-echo "🔍 Validation Complète Management Cluster"
-echo "=========================================="
-
-# Check cluster exists
-if kind get clusters 2>/dev/null | grep -q "capi-management"; then
-  echo "✅ Cluster kind existe"
-else
-  echo "❌ Cluster kind manquant"
-  exit 1
-fi
-
-# Check all namespaces
-for ns in capi-system capd-system cert-manager; do
-  if kubectl get namespace $ns &>/dev/null; then
-    echo "✅ Namespace $ns existe"
-  else
-    echo "❌ Namespace $ns manquant"
-    exit 1
-  fi
-done
-
-# Check all deployments running
-DEPLOYMENTS=(
-  "capi-system/capi-controller-manager"
-  "capd-system/capd-controller-manager"
-  "cert-manager/cert-manager"
-)
-
-for deploy in "${DEPLOYMENTS[@]}"; do
-  ns=$(echo $deploy | cut -d'/' -f1)
-  name=$(echo $deploy | cut -d'/' -f2)
-  if kubectl get deployment -n $ns $name &>/dev/null; then
-    ready=$(kubectl get deployment -n $ns $name -o jsonpath='{.status.readyReplicas}')
-    desired=$(kubectl get deployment -n $ns $name -o jsonpath='{.spec.replicas}')
-    if [ "$ready" == "$desired" ]; then
-      echo "✅ Deployment $deploy : $ready/$desired ready"
-    else
-      echo "❌ Deployment $deploy : $ready/$desired ready"
-      exit 1
-    fi
-  else
-    echo "❌ Deployment $deploy manquant"
-    exit 1
-  fi
-done
-
-echo "=========================================="
-echo "🎉 Validation complète réussie!"
-echo "🚀 Management cluster opérationnel"
-EOF
-
+# Le script full-check.sh est disponible dans le répertoire du module
 chmod +x full-check.sh
 ./full-check.sh
 ```
@@ -1000,7 +898,7 @@ chmod +x full-check.sh
 **Architecture Finale :**
 ```
 Management Cluster (kind) ✅
-├── ClusterAPI v1.11.1 ✅
+├── ClusterAPI v1.10.6 ✅
 ├── Docker Provider ✅
 └── cert-manager v1.18.2 ✅
 

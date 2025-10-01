@@ -1,0 +1,207 @@
+# =============================================================================
+# EXEMPLES DE CONFIGURATIONS - terraform.tfvars
+# =============================================================================
+# Copiez l'exemple de votre choix dans terraform.tfvars
+# =============================================================================
+
+# =============================================================================
+# EXEMPLE 1 : Workshop avec 10 participants (Configuration par défaut)
+# =============================================================================
+# Usage: Formation de 2h avec participants nécessitant des VMs identiques
+# Coût: ~$400/mois (24/7) ou ~$1/jour si utilisé 2h
+
+vm_count                = 10
+vm_name_prefix          = "workshop-vm"
+default_vm_size         = "Standard_B2s"        # 2 vCPU, 4 GB RAM
+default_os_disk_size_gb = 50
+default_os_disk_type    = "Standard_LRS"
+location                = "westeurope"
+project_name            = "workshop"
+environment             = "dev"
+allowed_ssh_cidrs       = ["0.0.0.0/0"]         # ⚠️ Restreignez pour production
+
+tags = {
+  Workshop     = "ClusterAPI-k0smotron"
+  Duration     = "2-hours"
+  Participants = "10"
+}
+
+# =============================================================================
+# EXEMPLE 2 : Workshop économique (15 participants, VMs minimales)
+# =============================================================================
+# Usage: Workshops avec budget limité, exercices légers
+# Coût: ~$150/mois (24/7) ou ~$0.50/jour pour 2h
+
+# vm_count                = 15
+# vm_name_prefix          = "participant"
+# default_vm_size         = "Standard_B1s"        # 1 vCPU, 1 GB RAM
+# default_os_disk_size_gb = 30
+# default_os_disk_type    = "Standard_LRS"
+# location                = "francecentral"
+# project_name            = "training"
+# environment             = "dev"
+# allowed_ssh_cidrs       = ["0.0.0.0/0"]
+#
+# tags = {
+#   Workshop   = "Kubernetes-Basics"
+#   Budget     = "Economy"
+# }
+
+# =============================================================================
+# EXEMPLE 3 : Environment de test haute performance (5 VMs puissantes)
+# =============================================================================
+# Usage: Tests de performance, benchmarks, CI/CD intensif
+# Coût: ~$700/mois (24/7)
+
+# vm_count                = 5
+# vm_name_prefix          = "test-node"
+# default_vm_size         = "Standard_D4s_v3"    # 4 vCPU, 16 GB RAM
+# default_os_disk_size_gb = 100
+# default_os_disk_type    = "Premium_LRS"        # SSD Premium
+# location                = "westeurope"
+# project_name            = "performance"
+# environment             = "test"
+# allowed_ssh_cidrs       = ["203.0.113.0/24"]   # Réseau d'entreprise
+#
+# tags = {
+#   Environment = "Performance-Testing"
+#   Team        = "QA"
+# }
+
+# =============================================================================
+# EXEMPLE 4 : Cluster Kubernetes DIY (1 master + 3 workers)
+# =============================================================================
+# Usage: Installer Kubernetes manuellement sur 4 VMs
+# Coût: ~$280/mois (24/7)
+
+# vm_count                = 4
+# vm_name_prefix          = "k8s-node"
+# default_vm_size         = "Standard_D2s_v3"    # 2 vCPU, 8 GB RAM
+# default_os_disk_size_gb = 80
+# default_os_disk_type    = "StandardSSD_LRS"
+# location                = "francecentral"
+# project_name            = "k8s-cluster"
+# environment             = "dev"
+# allowed_ssh_cidrs       = ["203.0.113.0/24"]
+#
+# tags = {
+#   Cluster = "k8s-manual"
+#   Purpose = "Learning"
+# }
+
+# =============================================================================
+# EXEMPLE 5 : Lab temporaire (20 VMs pour 1 journée)
+# =============================================================================
+# Usage: Événement ponctuel, hackathon, certification
+# Coût: ~$3-5 pour 8h d'utilisation
+
+# vm_count                = 20
+# vm_name_prefix          = "lab"
+# default_vm_size         = "Standard_B2s"
+# default_os_disk_size_gb = 40
+# default_os_disk_type    = "Standard_LRS"
+# location                = "westeurope"
+# project_name            = "hackathon"
+# environment             = "temp"
+# allowed_ssh_cidrs       = ["0.0.0.0/0"]        # Public pour événement
+#
+# tags = {
+#   Event    = "Hackathon-2025"
+#   Duration = "1-day"
+#   AutoDelete = "true"
+# }
+
+# =============================================================================
+# EXEMPLE 6 : CI/CD Runners (8 runners identiques)
+# =============================================================================
+# Usage: GitLab runners, GitHub Actions self-hosted, Jenkins agents
+# Coût: ~$320/mois (24/7)
+
+# vm_count                = 8
+# vm_name_prefix          = "runner"
+# default_vm_size         = "Standard_B2s"
+# default_os_disk_size_gb = 60
+# default_os_disk_type    = "StandardSSD_LRS"
+# location                = "northeurope"
+# project_name            = "cicd"
+# environment             = "prod"
+# allowed_ssh_cidrs       = ["203.0.113.0/24"]
+# enable_public_ip        = false                # Accès privé uniquement
+#
+# tags = {
+#   Purpose = "CI-CD-Runners"
+#   Team    = "DevOps"
+# }
+
+# =============================================================================
+# EXEMPLE 7 : Développement multi-région (3 régions × 2 VMs)
+# =============================================================================
+# Usage: Tests de latence, geo-distribution
+# Note: Déployez 3 fois avec location différente
+# Coût: ~$240/mois (24/7) pour 6 VMs total
+
+# # Déploiement 1: Europe
+# vm_count                = 2
+# vm_name_prefix          = "eu-node"
+# location                = "westeurope"
+# default_vm_size         = "Standard_B2s"
+# default_os_disk_size_gb = 50
+#
+# # Déploiement 2: USA (changez location et vm_name_prefix)
+# # location              = "eastus"
+# # vm_name_prefix        = "us-node"
+#
+# # Déploiement 3: Asie (changez location et vm_name_prefix)
+# # location              = "southeastasia"
+# # vm_name_prefix        = "asia-node"
+
+# =============================================================================
+# EXEMPLE 8 : VMs sécurisées sans IP publique
+# =============================================================================
+# Usage: Backend sécurisé, base de données, services internes
+# Coût: ~$400/mois (24/7)
+# Note: Accès uniquement via Bastion Host ou VPN
+
+# vm_count                = 10
+# vm_name_prefix          = "backend"
+# default_vm_size         = "Standard_B2s"
+# default_os_disk_size_gb = 50
+# default_os_disk_type    = "Standard_LRS"
+# location                = "westeurope"
+# project_name            = "secure-backend"
+# environment             = "prod"
+# enable_public_ip        = false                # Pas d'IP publique
+# allowed_ssh_cidrs       = ["10.0.0.0/8"]       # Accès réseau interne
+#
+# tags = {
+#   Security = "High"
+#   Tier     = "Backend"
+# }
+
+# =============================================================================
+# NOTES IMPORTANTES
+# =============================================================================
+#
+# 1. SÉCURITÉ SSH
+#    - ⚠️ allowed_ssh_cidrs = ["0.0.0.0/0"] permet l'accès depuis n'importe où
+#    - Pour production, restreignez: ["203.0.113.0/24"]
+#    - Obtenez votre IP: curl ifconfig.me
+#
+# 2. COÛTS
+#    - Tous les coûts sont estimatifs (24/7)
+#    - Arrêtez les VMs pour économiser: az vm stop
+#    - Utilisez le calculateur Azure: https://azure.microsoft.com/pricing/calculator/
+#
+# 3. RÉGIONS
+#    - Vérifiez la disponibilité des tailles de VM par région
+#    - Liste complète: az account list-locations -o table
+#
+# 4. LIMITES DE QUOTA
+#    - Par défaut: ~20 vCPUs par région
+#    - Pour plus: Demandez une augmentation de quota dans le portail Azure
+#
+# 5. TAGS
+#    - Utilisez les tags pour l'organisation et le cost tracking
+#    - Azure Cost Management utilise les tags pour les rapports
+#
+# =============================================================================

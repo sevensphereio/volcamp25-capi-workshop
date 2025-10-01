@@ -1,0 +1,27 @@
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfstate.backup-*
+*.tfplan
+.terraform.lock.hcl
+
+# SSH keys
+*.pem
+*.key
+workshop_key*
+
+# Inventory
+inventory.txt
+inventory.json
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
