@@ -442,6 +442,6 @@ kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get pods -n kub
 - Comparer avec Docker provider
 
 ```bash
-cd ../03-k0smotron
+cd ~/03-k0smotron
 cat commands.md
 ```
