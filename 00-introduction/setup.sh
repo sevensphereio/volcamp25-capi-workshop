@@ -327,15 +327,7 @@ install_clusterctl() {
     if [ "$OS" = "linux" ]; then
         curl -L "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTERCTL_VERSION}/clusterctl-linux-${ARCH}" -o clusterctl
     elif [ "$OS" = "darwin" ]; then
-        if check_command brew; then
-            print_step "Installation via Homebrew..."
-            brew install clusterctl
-            print_success "clusterctl installé via Homebrew"
-            echo ""
-            return 0
-        else
-            curl -L "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTERCTL_VERSION}/clusterctl-darwin-${ARCH}" -o clusterctl
-        fi
+        curl -L "https://github.com/kubernetes-sigs/cluster-api/releases/download/${CLUSTERCTL_VERSION}/clusterctl-darwin-${ARCH}" -o clusterctl
     fi
 
     chmod +x ./clusterctl

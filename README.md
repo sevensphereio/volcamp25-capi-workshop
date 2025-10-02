@@ -382,7 +382,7 @@ kubectl describe helmchartproxy <name>
 kubectl get helmreleaseproxy -A
 
 # Logs du Helm Provider
-kubectl logs -n capi-addon-system deployment/capi-addon-helm-controller-manager
+kubectl logs -n caaph-system deployment/capi-addon-helm-controller-manager
 ```
 
 ---

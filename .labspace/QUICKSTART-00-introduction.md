@@ -42,6 +42,16 @@ brew install yq
 
 ### Augmenter les limites système (IMPORTANT!)
 
+#### Option A : Script Automatique (RECOMMANDÉ)
+
+```bash
+cd 00-introduction
+./configure-system-limits.sh
+# Puis reconnectez-vous (logout/login)
+```
+
+#### Option B : Configuration Manuelle
+
 ```bash
 # Linux - Configuration optimale pour le workshop
 echo "fs.inotify.max_user_watches=524288" | sudo tee -a /etc/sysctl.conf
@@ -102,6 +112,15 @@ cd 00-introduction
 | `jq --version` | Version >= 1.6 |
 | `yq --version` | Version >= 4.44.6 |
 | `tree --version` | Version >= 1.8.0 |
+| **Limites système** | **Toutes >= minimales requises** |
+| `fs.inotify.max_user_watches` (Linux) | >= 524288 |
+| `fs.inotify.max_user_instances` (Linux) | >= 512 |
+| `fs.file-max` (Linux) | >= 2097152 |
+| `kernel.pid_max` (Linux) | >= 4194304 |
+| `net.core.somaxconn` (Linux) | >= 32768 |
+| `ulimit -n` (Linux/macOS) | >= 1048576 |
+| `launchctl maxfiles` (macOS) | >= 1048576 |
+| Docker daemon | Accessible et en exécution |
 | `./verification.sh` | Tous les ✅ |
 
 ---

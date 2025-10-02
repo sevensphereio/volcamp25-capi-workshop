@@ -15,7 +15,18 @@
       "Bash(mv:*)",
       "Bash(for:*)",
       "Bash(do echo \"Checking $dir:\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(kubectl get:*)",
+      "Bash(./validation.sh)",
+      "Bash(clusterctl init:*)",
+      "Bash(./verification.sh:*)",
+      "Bash(kind get:*)",
+      "Bash(kind create cluster:*)",
+      "Bash(kubectl:*)",
+      "Bash(export CLUSTER_TOPOLOGY=true)",
+      "Bash(export EXP_CLUSTER_RESOURCE_SET=true)",
+      "Bash(./verify-docker-socket.sh:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

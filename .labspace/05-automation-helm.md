@@ -42,50 +42,42 @@
 
 **Objectif:** Ajouter le support pour le déploiement automatique d'applications Helm multi-clusters
 
-**Commandes:**
+**Commande:**
 ```bash
-# Ajouter le repository Helm
-helm repo add capi-addon-provider https://kubernetes-sigs.github.io/cluster-api-addon-provider-helm
-helm repo update
-
-# Installer le provider
-helm install capi-addon-provider capi-addon-provider/cluster-api-addon-provider-helm \
-  --namespace capi-addon-system \
-  --create-namespace \
-  --wait \
-  --timeout 300s
+clusterctl init \
+  --core cluster-api:v1.10.6 \
+  --bootstrap kubeadm:v1.10.6 \
+  --control-plane kubeadm:v1.10.6 \
+  --infrastructure docker:v1.10.6 \
+  --addon helm:v0.3.2
 ```
 
 **Explication de la commande:**
-- `helm repo add` : Enregistre le repository officiel
-- `helm install` : Déploie le chart
-- `--namespace capi-addon-system` : Crée et utilise ce namespace
-- `--create-namespace` : Crée le namespace s'il n'existe pas
-- `--wait` : Attend que tous les pods soient Running
-- `--timeout 300s` : Timeout de 5 minutes
+- `clusterctl init` : Commande d'initialisation ClusterAPI
+- `--addon helm:v0.3.2` : Installe le Helm Addon Provider version 0.3.2
+- Installation automatique dans le namespace `caaph-system` (CAPI Addon Provider Helm)
+- Doit être exécuté avec tous les providers pour ajouter l'addon
 
 **Résultat attendu:**
 ```
-"capi-addon-provider" has been added to your repositories
-Hang tight while we grab the latest from your chart repositories...
-...Successfully got an update from the "capi-addon-provider" chart repository
+Fetching providers
+Skipping installing cert-manager as it is already installed
+Installing Provider="addon-helm" Version="v0.3.2" TargetNamespace="caaph-system"
 
-NAME: capi-addon-provider
-LAST DEPLOYED: [DATE]
-NAMESPACE: capi-addon-system
-STATUS: deployed
-REVISION: 1
+Your management cluster has been configured with the addon provider!
+
+You can now use HelmChartProxy to deploy Helm charts across multiple clusters.
 ```
 
 **✅ Vérification:**
 ```bash
-kubectl get pods -n capi-addon-system
+kubectl get pods -n caaph-system
 ```
 
 **Résultat attendu:**
 ```
-NAME                                                      READY   STATUS    RESTARTS   AGE
-capi-addon-helm-controller-manager-xxx                    2/2     Running   0          1m
+NAME                                        READY   STATUS    RESTARTS   AGE
+caaph-controller-manager-xxx                1/1     Running   0          1m
 ```
 
 ---
@@ -96,7 +88,7 @@ capi-addon-helm-controller-manager-xxx                    2/2     Running   0   
 
 **Commande:**
 ```bash
-cd /home/ubuntu/R_D/CLAUDE_PROJECTS/capi-workshop/workshop-express/05-automation-helm
+cd ~/05-automation-helm
 cat nginx-helmchartproxy.yaml
 ```
 
@@ -126,6 +118,7 @@ spec:
 
 **✅ Vérification:** Le HelmChartProxy cible `environment: demo` et déploiera nginx avec 2 replicas sur tous les clusters matchants.
 
+**hint: y'a aussi openbao à tester :)**
 ---
 
 ### Action 3: Labeller les clusters pour le ciblage
@@ -135,7 +128,6 @@ spec:
 **Commande:**
 ```bash
 kubectl label cluster dev-cluster environment=demo
-kubectl label cluster k0s-demo-cluster environment=demo
 ```
 
 **Explication de la commande:**
@@ -145,7 +137,6 @@ kubectl label cluster k0s-demo-cluster environment=demo
 **Résultat attendu:**
 ```
 cluster.cluster.x-k8s.io/dev-cluster labeled
-cluster.cluster.x-k8s.io/k0s-demo-cluster labeled
 ```
 
 **✅ Vérification:** Les deux clusters ont maintenant le label qui matche le clusterSelector.
@@ -168,7 +159,6 @@ kubectl get clusters --show-labels
 ```
 NAME                 PHASE         AGE   LABELS
 dev-cluster          Provisioned   25m   cni=calico,environment=demo
-k0s-demo-cluster     Provisioned   20m   cni=calico,environment=demo
 ```
 
 **✅ Vérification:** Les deux clusters ont `environment=demo` dans leurs labels.
@@ -219,7 +209,6 @@ helmchartproxy.addons.cluster.x-k8s.io/nginx-app         False   Reconciling
 
 NAME                                                                         READY   STATUS
 helmreleaseproxy.addons.cluster.x-k8s.io/dev-cluster-nginx-app               False   Installing
-helmreleaseproxy.addons.cluster.x-k8s.io/k0s-demo-cluster-nginx-app          False   Installing
 ```
 
 **~30 secondes:**
@@ -229,7 +218,6 @@ helmchartproxy.addons.cluster.x-k8s.io/nginx-app         True    Ready
 
 NAME                                                                         READY   STATUS
 helmreleaseproxy.addons.cluster.x-k8s.io/dev-cluster-nginx-app               True    Deployed
-helmreleaseproxy.addons.cluster.x-k8s.io/k0s-demo-cluster-nginx-app          True    Deployed
 ```
 
 **✅ Vérification:** 2 HelmReleaseProxy créés automatiquement (1 par cluster) et STATUS=Deployed. Appuyez sur Ctrl+C.
@@ -252,7 +240,6 @@ kubectl get helmreleaseproxy -o wide
 ```
 NAME                             CLUSTER           READY   STATUS     REVISION   CHART        VERSION
 dev-cluster-nginx-app            dev-cluster       True    Deployed   1          nginx        15.1.0
-k0s-demo-cluster-nginx-app       k0s-demo-cluster  True    Deployed   1          nginx        15.1.0
 ```
 
 **✅ Vérification:** Même chart, même version sur les deux clusters = consistance garantie!
@@ -289,7 +276,7 @@ nginx-app-yyy                1/1     Running   0          2m
 
 **Commande:**
 ```bash
-kubectl --kubeconfig ../03-k0smotron/k0s-demo-cluster.kubeconfig get pods -l app.kubernetes.io/name=nginx
+kubectl --kubeconfig ~/03-k0smotron/k0s-demo-cluster.kubeconfig get pods -l app.kubernetes.io/name=nginx
 ```
 
 **Explication de la commande:**
@@ -313,12 +300,8 @@ nginx-app-yyy                1/1     Running   0          2m
 
 **Commande:**
 ```bash
-echo "=== dev-cluster nginx service ==="
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get svc nginx-app
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get svc nginx-app
 
-echo ""
-echo "=== k0s-demo-cluster nginx service ==="
-kubectl --kubeconfig ../03-k0smotron/k0s-demo-cluster.kubeconfig get svc nginx-app
 ```
 
 **Explication de la commande:**
@@ -342,18 +325,11 @@ nginx-app   NodePort   10.96.xxx.xxx  <none>        80:xxxxx/TCP   3m
 **Commande:**
 ```bash
 # Test dev-cluster
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig port-forward svc/nginx-app 8080:80 &
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig port-forward svc/nginx-app 8080:80 &
 PID1=$!
 sleep 2
 curl -s http://localhost:8080 | grep -o "<title>.*</title>"
 kill $PID1 2>/dev/null
-
-# Test k0s-demo-cluster
-kubectl --kubeconfig ../03-k0smotron/k0s-demo-cluster.kubeconfig port-forward svc/nginx-app 8081:80 &
-PID2=$!
-sleep 2
-curl -s http://localhost:8081 | grep -o "<title>.*</title>"
-kill $PID2 2>/dev/null
 ```
 
 **Explication de la commande:**
@@ -387,29 +363,23 @@ kill $PID2 2>/dev/null
 
 **Résultat attendu:**
 ```
-🔍 Module 04: Validation Automation Helm
+🔍 Module 05: Validation Automation Helm
 =======================================
 
-✅ HelmChartProxy nginx-app existe
-✅ Cluster dev-cluster a le label environment=demo
-✅ Cluster k0s-demo-cluster a le label environment=demo
-✅ 2 HelmReleaseProxy créés automatiquement
-✅ HelmReleaseProxy dev-cluster-nginx-app Ready
-✅ HelmReleaseProxy k0s-demo-cluster-nginx-app Ready
-✅ 2 pods nginx Running dans dev-cluster
-✅ 2 pods nginx Running dans k0s-demo-cluster
-✅ Service nginx-app existe dans dev-cluster
-✅ Service nginx-app existe dans k0s-demo-cluster
+- ✅ HelmChartProxy nginx-app existe
+- ✅ Cluster dev-cluster a le label environment=demo
+- ✅ Cluster k0s-demo-cluster a le label environment=demo
+- ✅ 2 HelmReleaseProxy créés automatiquement
+- ✅ HelmReleaseProxy dev-cluster-nginx-app Ready
+- ✅ HelmReleaseProxy k0s-demo-cluster-nginx-app Ready
+- ✅ 2 pods nginx Running dans dev-cluster
+- ✅ Service nginx-app existe dans dev-cluster
+- ✅ Service nginx-app existe dans k0s-demo-cluster
 
-📊 Résumé déploiement automatique:
-   🎯 1 HelmChartProxy → 2 clusters ciblés
-   🚀 2 HelmReleaseProxy → 4 pods nginx (2x2)
-   ⚡ Déploiement en ~30 secondes
-   🔄 GitOps: ajout cluster = déploiement auto
 
 =======================================
-🎉 Module 04 terminé avec succès!
-🚀 Prêt pour Module 05: Operations & Cleanup
+🎉 Module 05 terminé avec succès!
+🚀 Prêt pour Module 06: Cluster Upgrades
 =======================================
 ```
 
@@ -530,18 +500,4 @@ kubectl --kubeconfig dev-cluster.kubeconfig get events --sort-by=.lastTimestamp
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm search repo bitnami/nginx
 helm show chart bitnami/nginx --version 15.1.0
-```
-
----
-
-## ⏭️ Prochaine Étape
-
-**Module 05 (15 min):** Operations & Cleanup
-- Scaling des workers
-- Monitoring des ressources
-- Cleanup complet de l'environnement
-
-```bash
-cd ../07-operations-cleanup
-cat commands.md
 ```

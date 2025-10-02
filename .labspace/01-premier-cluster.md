@@ -1,6 +1,6 @@
 # Module 01: Premier Cluster ClusterAPI
 
-**Durée:** 15 minutes
+**Durée:** 15 minutes. 
 **Objectif:** Créer votre premier cluster Kubernetes avec ClusterAPI Docker provider
 
 ---
@@ -17,15 +17,13 @@
 
 ### Ce que vous allez apprendre
 
-✅ Générer un manifeste de cluster avec clusterctl generate
-✅ Créer un cluster Kubernetes déclarativement avec un fichier YAML
-✅ Observer la création automatique du control plane et des workers
-✅ Comprendre pourquoi 7 objets sont nécessaires pour 1 cluster
-✅ Accéder au cluster créé et comprendre l'état "NotReady"
+- ✅ Générer un manifeste de cluster avec clusterctl generate
+- ✅ Créer un cluster Kubernetes déclarativement avec un fichier YAML
+- ✅ Observer la création automatique du control plane et des workers
+- ✅ Comprendre pourquoi 7 objets sont nécessaires pour 1 cluster
+- ✅ Accéder au cluster créé et comprendre l'état "NotReady"
 
 ### Le Principe : 1 Manifeste = 7 Objets
-
-**Analogie :** Imaginez commander un **meuble IKEA**. Le catalogue (dev-cluster.yaml) contient 7 pièces interconnectées. Quand vous passez commande (`kubectl apply`), l'usine automatisée (ClusterAPI) assemble toutes les pièces dans le bon ordre pour livrer un meuble fonctionnel.
 
 **Pourquoi 7 objets ?** Séparation des responsabilités. Chaque objet a un rôle précis :
 
@@ -53,7 +51,7 @@ Cluster                    → Chef d'orchestre (coordonne tout)
 
 **Commande :**
 ```bash
-cd /home/volcampdev/workshop-express/01-premier-cluster
+cd ~/01-premier-cluster
 ```
 
 **Explication :**
@@ -488,15 +486,11 @@ kube-system   kube-scheduler-dev-cluster-control-plane-xxxx       1/1     Runnin
 
 ## ⏭️ Prochaine Étape
 
-**Module 02 (15 min) :** Installer Calico CNI automatiquement
+**Module 02-networking-calico (15 min) :** Installer Calico CNI automatiquement
 - Comprendre ClusterResourceSets
 - Automatiser le déploiement de Calico
 - Passer les nodes à Ready
 
-```bash
-cd ../02-networking-calico
-cat commands.md
-```
 
 ---
 
@@ -1003,13 +997,13 @@ kubectl scale machinedeployment dev-cluster-md-0 --replicas=5
 
 ## 🎓 Ce Que Vous Avez Appris
 
-✅ Créer un cluster Kubernetes déclarativement (1 YAML = 7 objets)
-✅ Observer la progression en temps réel (Pending → Provisioned)
-✅ Comprendre l'architecture à 7 objets interconnectés
-✅ Différencier Machines (CRD ClusterAPI) et Nodes (objet K8s)
-✅ Accéder au workload cluster avec kubeconfig
-✅ Diagnostiquer pourquoi les nodes sont NotReady (CNI manquant)
-✅ Scaler les workers avec `kubectl scale`
+- ✅ Créer un cluster Kubernetes déclarativement (1 YAML = 7 objets)
+- ✅ Observer la progression en temps réel (Pending → Provisioned)
+- ✅ Comprendre l'architecture à 7 objets interconnectés
+- ✅ Différencier Machines (CRD ClusterAPI) et Nodes (objet K8s)
+- ✅ Accéder au workload cluster avec kubeconfig
+- ✅ Diagnostiquer pourquoi les nodes sont NotReady (CNI manquant)
+- ✅ Scaler les workers avec `kubectl scale`
 
 ---
 

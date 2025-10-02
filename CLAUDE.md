@@ -219,7 +219,7 @@ docker ps && docker stats --no-stream
 # Check HelmReleaseProxy objects
 kubectl get helmreleaseproxy -A
 # Check Helm provider logs
-kubectl logs -n capi-addon-system deployment/capi-addon-helm-controller-manager -f
+kubectl logs -n caaph-system deployment/capi-addon-helm-controller-manager -f
 # Verify cluster labels match selector
 kubectl get clusters --show-labels
 ```

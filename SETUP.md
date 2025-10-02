@@ -433,13 +433,13 @@ helm repo update
 
 # Install Helm Addon Provider
 helm install capi-addon-provider capi-addon-provider/cluster-api-addon-provider-helm \
-  --namespace capi-addon-system \
+  --namespace caaph-system \
   --create-namespace \
   --wait \
   --timeout 300s
 
 # Verify installation
-kubectl get pods -n capi-addon-system
+kubectl get pods -n caaph-system
 ```
 
 **Expected Output:**
@@ -562,7 +562,7 @@ kubectl apply -f https://github.com/k0sproject/k0smotron/releases/download/v1.7.
 # Install Helm provider
 helm repo add capi-addon-provider https://kubernetes-sigs.github.io/cluster-api-addon-provider-helm
 helm install capi-addon-provider capi-addon-provider/cluster-api-addon-provider-helm \
-  --namespace capi-addon-system --create-namespace --wait
+  --namespace caaph-system --create-namespace --wait
 ```
 
 **Step 3: Participant Isolation**
@@ -956,14 +956,14 @@ helm repo list
 ```bash
 # Increase timeout
 helm install capi-addon-provider capi-addon-provider/cluster-api-addon-provider-helm \
-  --namespace capi-addon-system \
+  --namespace caaph-system \
   --create-namespace \
   --wait \
   --timeout 600s
 
 # Check pod status
-kubectl get pods -n capi-addon-system
-kubectl describe pod -n capi-addon-system <pod-name>
+kubectl get pods -n caaph-system
+kubectl describe pod -n caaph-system <pod-name>
 ```
 
 ### Performance Tuning

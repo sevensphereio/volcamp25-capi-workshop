@@ -174,7 +174,7 @@ else
     echo "Vérifiez les logs:"
     echo "  kubectl describe helmchartproxy nginx-app"
     echo "  kubectl get helmreleaseproxy -o wide"
-    echo "  kubectl logs -n capi-system -l cluster.x-k8s.io/provider=addon-helm"
+    echo "  kubectl logs -n caaph-system deployment/caaph-controller-manager"
     echo "  kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -l app.kubernetes.io/name=nginx"
     exit 1
 fi

@@ -7,10 +7,10 @@
 ## 🎯 Objectifs & Concepts
 
 ### Ce que vous allez apprendre
-- Pourquoi les nodes sont NotReady sans CNI (Container Network Interface)
-- Comment ClusterResourceSet automatise le déploiement d'addons
-- Déployer Calico automatiquement avec le pattern label-based
-- Passer les nodes de NotReady à Ready
+- ✅ Pourquoi les nodes sont NotReady sans CNI (Container Network Interface)
+- ✅ Comment ClusterResourceSet automatise le déploiement d'addons
+- ✅ Déployer Calico automatiquement avec le pattern label-based
+- ✅ Passer les nodes de NotReady à Ready
 
 ### Concepts clés
 **CNI (Container Network Interface):** Plugin réseau qui permet la communication pod-to-pod. Sans CNI, kubelet déclare les nodes NotReady car il ne peut pas garantir la connectivité réseau.
@@ -19,16 +19,16 @@
 
 **Workflow CRS:**
 ```
-1. Créer ClusterResourceSet + ConfigMap (contient manifeste)
-2. Labeller le cluster cible
+1. Créer ClusterResourceSet + ConfigMap (contient manifest)
+2. labeliser le cluster cible
 3. CRS controller détecte le match et applique automatiquement
 ```
 
 **Avantages vs installation manuelle:**
-- Automatique dès labelling (pas de kubectl apply manuel)
-- Déclaratif et versionné Git (GitOps ready)
+- Automatique une fois le labelling fait (pas de kubectl apply manuel)
+- Déclaratif et versionnable Git (GitOps ready)
 - Réutilisable pour N clusters (même label = même addon)
-- Self-service (nouveau cluster avec label = addon auto-installé)
+- Self-service (nouveau cluster avec le bon label = addon auto-installé)
 
 ---
 
@@ -40,8 +40,8 @@
 
 **Commande:**
 ```bash
-cd /home/ubuntu/R_D/CLAUDE_PROJECTS/capi-workshop/workshop-express/02-networking-calico
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get nodes
+cd ~/02-networking-calico
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get nodes
 ```
 
 **Explication de la commande:**
@@ -66,7 +66,7 @@ dev-cluster-md-0-yyyyy-aaaaa      NotReady   <none>          4m    v1.32.8
 
 **Commande:**
 ```bash
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig describe node dev-cluster-control-plane-* | grep -A 5 "Conditions:"
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig describe node dev-cluster-control-plane-* | grep -A 5 "Conditions:"
 ```
 
 **Explication de la commande:**
@@ -134,7 +134,7 @@ data:
 
 **Commande:**
 ```bash
-kubectl apply -f calico-crs.yaml
+kubectl apply -f calico-crs.yaml -f calico-cm-crs.yaml
 ```
 
 **Explication de la commande:**
@@ -223,7 +223,7 @@ dev-cluster   Provisioned  10m   cni=calico,environment=demo
 
 **Commande:**
 ```bash
-watch -n 2 'kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system'
+watch -n 2 'kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system'
 ```
 
 **Explication de la commande:**
@@ -260,7 +260,7 @@ coredns-xxx                             1/1     Running   0
 
 **Commande:**
 ```bash
-watch -n 2 'kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get nodes'
+watch -n 2 'kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get nodes'
 ```
 
 **Explication de la commande:**
@@ -287,8 +287,8 @@ dev-cluster-md-0-yyyyy-aaaaa      Ready    <none>          10m
 
 **Commande:**
 ```bash
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig run test-pod --image=nginx --restart=Never
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pod test-pod -o wide
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig run test-pod --image=nginx --restart=Never
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get pod test-pod -o wide
 ```
 
 **Explication de la commande:**
@@ -306,7 +306,7 @@ test-pod   1/1     Running   0          20s   192.168.X.Y     dev-cluster-md-0-.
 
 **Cleanup:**
 ```bash
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig delete pod test-pod
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig delete pod test-pod
 ```
 
 ---
@@ -412,8 +412,8 @@ Calico offre également :
 
 **Pods Calico ne démarrent pas :**
 ```bash
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get events -n kube-system --sort-by='.lastTimestamp'
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig logs -n kube-system calico-node-xxx
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get events -n kube-system --sort-by='.lastTimestamp'
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig logs -n kube-system calico-node-xxx
 ```
 
 **CRS ne s'applique pas :**
@@ -429,7 +429,7 @@ kubectl logs -n capi-system deployment/capi-controller-manager | grep clusterres
 ```bash
 # Attendre 1-2 minutes après installation Calico
 # Vérifier que tous les pods Calico sont Running
-kubectl --kubeconfig ../01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system -l k8s-app=calico-node
+kubectl --kubeconfig ~/01-premier-cluster/dev-cluster.kubeconfig get pods -n kube-system -l k8s-app=calico-node
 ```
 
 ---

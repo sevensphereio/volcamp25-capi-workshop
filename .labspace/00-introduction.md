@@ -7,7 +7,7 @@
 
 ## 📑 Table des Matières
 
-- [🎯 Objectifs](#-objectifs). 
+- [🎯 Objectifs](#-objectifs).
 - [📋 Outils à Installer](#-outils-à-installer). 
 - [🔧 Installation Pas-à-Pas](#-installation-pas-à-pas). 
 - [✅ Validation Finale](#-validation-finale). 
@@ -18,19 +18,19 @@
 
 À la fin de ce module, vous aurez installé et validé :
 
-✅ **Docker Engine** - Runtime pour les containers
-✅ **kind** - Kubernetes IN Docker (management cluster)
-✅ **kubectl** - CLI Kubernetes
-✅ **kubectl plugins** - kubens, kubectx, kubectl-slice, kubectl-klock
-✅ **clusterctl** - CLI ClusterAPI
-✅ **Helm** - Gestionnaire de packages Kubernetes
-✅ **jq** - Parser JSON en ligne de commande
-✅ **yq** - Parser YAML en ligne de commande
-✅ **tree** - Visualisation arborescente de répertoires
+- ✅ **Docker Engine** - Runtime pour les containers. 
+- ✅ **kind** - Kubernetes IN Docker (management cluster). 
+- ✅ **kubectl** - CLI Kubernetes
+- ✅ **kubectl plugins** - kubens, kubectx, kubectl-slice, kubectl-klock
+- ✅ **clusterctl** - CLI ClusterAPI
+- ✅ **Helm** - Gestionnaire de packages Kubernetes
+- ✅ **jq** - Parser JSON en ligne de commande
+- ✅ **yq** - Parser YAML en ligne de commande
+- ✅ **tree** - Visualisation arborescente de répertoires
 
 ---
 
-## 📋 Outils à Installer
+## 📋 Outils mis en jeu
 
 ### Récapitulatif des Composants
 
@@ -38,12 +38,12 @@
 |-------|------------------|------------------|
 | **Docker Engine** | 20.10+ | Runtime pour kind et clusters CAPD |
 | **kind** | 0.30.0+ | Management cluster local |
-| **kubectl** | 1.32.0+ | Interagir avec tous les clusters |
+| **kubectl** | 1.32.0+ | outils de gestion en CLI pour clusters k8s |
 | **kubens** | - | Changer de namespace rapidement |
 | **kubectx** | - | Changer de contexte Kubernetes |
-| **kubectl-slice** | - | Découper manifests YAML multi-documents |
-| **kubectl-klock** | - | Verrouiller ressources pour éviter modifications accidentelles |
-| **clusterctl** | 1.11.1+ | CLI ClusterAPI (init, create, upgrade) |
+| **kubectl-slice** | - | permet de découper un manifests YAML multi-documents |
+| **kubectl-klock** | - | kubectl -w mais en mieux |
+| **clusterctl** | 1.10.6 | CLI ClusterAPI (init, create, upgrade) |
 | **Helm** | 3.19.0+ | Gestionnaire de packages Kubernetes |
 | **jq** | 1.6+ | Manipuler JSON (kubeconfig, manifests) |
 | **yq** | 4.0+ | Manipuler YAML (manifests, values) |
@@ -52,6 +52,14 @@
 ## 🔧 Installation Pas-à-Pas
 
 > **💡 Note pour les Formateurs :** Si vous avez déjà préparé des machines avec tous les outils installés, les participants peuvent passer directement à la [section Validation](#-validation-finale).
+
+**FASTRACK**:
+```bash
+cd 00-introduction
+chmod +x setup.sh
+./setup.sh
+```
+
 
 ### Étape 1 : Déterminer votre système d'exploitation
 
@@ -100,7 +108,7 @@ newgrp docker
 docker --version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Installer Docker Desktop via Homebrew
@@ -136,7 +144,7 @@ sudo mv ./kind /usr/local/bin/kind
 kind --version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Via Homebrew
@@ -178,7 +186,7 @@ sudo mv kubectl /usr/local/bin/
 kubectl version --client
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Via Homebrew
@@ -274,18 +282,15 @@ sudo mv ./clusterctl /usr/local/bin/clusterctl
 clusterctl version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
-# Via Homebrew
-brew install clusterctl
-
-# OU manuellement (Intel)
+# Intel
 curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-darwin-amd64 -o clusterctl
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
 
-# OU manuellement (Apple Silicon)
+# Apple Silicon
 curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-darwin-arm64 -o clusterctl
 chmod +x ./clusterctl
 sudo mv ./clusterctl /usr/local/bin/clusterctl
@@ -294,7 +299,7 @@ sudo mv ./clusterctl /usr/local/bin/clusterctl
 clusterctl version
 ```
 
-**✅ Vérification :** `clusterctl version: &version.Info{Major:"1", Minor:"11"...}`
+**✅ Vérification :** `clusterctl version: &version.Info{Major:"1", Minor:"10", GitVersion:"v1.10.6"...}`
 
 ---
 
@@ -319,7 +324,7 @@ rm -rf linux-amd64 helm.tar.gz
 helm version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Via Homebrew
@@ -357,7 +362,7 @@ sudo apt-get install -y jq
 jq --version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Via Homebrew
@@ -389,7 +394,7 @@ sudo mv yq /usr/local/bin/yq
 yq --version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Via Homebrew
@@ -425,7 +430,7 @@ sudo apt-get install -y tree
 tree --version
 ```
 
-#### macOS
+#### macOS [ /!\ NON TESTE /!\ ]
 
 ```bash
 # Via Homebrew
@@ -451,7 +456,29 @@ Le workshop crée plusieurs clusters Kubernetes avec de nombreux containers. Les
 - ❌ Performance dégradée avec beaucoup de containers
 - ❌ Échecs de création de pods/containers
 
-#### Linux (Ubuntu/Debian)
+#### Option A : Script Automatique (RECOMMANDÉ)
+
+**Commande :**
+```bash
+# Lancer le script de configuration automatique
+./configure-system-limits.sh
+```
+
+Ce script interactif va :
+1. Détecter votre système d'exploitation (Linux/macOS)
+2. Configurer automatiquement toutes les limites nécessaires
+3. Créer des backups de vos fichiers de configuration
+4. Vérifier que tout est bien configuré
+
+**Note :** Vous devrez vous reconnecter après l'exécution du script pour que les changements prennent effet.
+
+---
+
+#### Option B : Configuration Manuelle
+
+Si vous préférez configurer manuellement ou si le script automatique échoue :
+
+##### Linux (Ubuntu/Debian)
 
 **Configuration des limites :**
 
@@ -654,15 +681,27 @@ cd 00-introduction
 ✅ kubectl plugin: ns installé
 ✅ kubectl plugin: slice installé
 ✅ kubectl plugin: klock installé
-✅ clusterctl installé (version 1.11.1)
+✅ clusterctl installé (version 1.10.6)
 ✅ Helm installé (version 3.19.0)
 ✅ jq installé (version 1.6)
 ✅ yq installé (version 4.44.6)
 ✅ tree installé (version 1.8.0)
 
 =============================================
+🔍 Vérification des limites système
+=============================================
+
+✅ fs.inotify.max_user_watches: 524288 (>= 524288)
+✅ fs.inotify.max_user_instances: 512 (>= 512)
+✅ fs.file-max: 2097152 (>= 2097152)
+✅ kernel.pid_max: 4194304 (>= 4194304)
+✅ net.core.somaxconn: 32768 (>= 32768)
+✅ ulimit -n (open files): 1048576 (>= 1048576)
+✅ Docker daemon accessible et en cours d'exécution
+
+=============================================
 🎉 Module 00 terminé avec succès!
-🚀 Tous les outils sont prêts pour le workshop
+🚀 Tous les outils et limites système sont prêts
 =============================================
 
 Prochaine commande:
@@ -692,14 +731,7 @@ Prochaine commande:
 
 ## ⏭️ Prochaine Étape
 
-Une fois tous les outils ✅, passez au **Module 00-setup-management** :
-
-```bash
-cd ../00-setup-management
-cat commands.md
-```
-
-**Module 00-setup-management :** Créer le management cluster et initialiser ClusterAPI
+Une fois tous les outils ✅, passez au **Module 00-setup-management**
 
 ---
 

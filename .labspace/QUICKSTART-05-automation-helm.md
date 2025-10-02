@@ -11,17 +11,15 @@
 cd /home/ubuntu/R_D/CLAUDE_PROJECTS/capi-workshop/workshop-express/05-automation-helm
 
 # 2. Installer le Helm Addon Provider
-helm repo add capi-addon-provider https://kubernetes-sigs.github.io/cluster-api-addon-provider-helm
-helm repo update
-
-helm install capi-addon-provider capi-addon-provider/cluster-api-addon-provider-helm \
-  --namespace capi-addon-system \
-  --create-namespace \
-  --wait \
-  --timeout 300s
+clusterctl init \
+  --core cluster-api:v1.10.6 \
+  --bootstrap kubeadm:v1.10.6 \
+  --control-plane kubeadm:v1.10.6 \
+  --infrastructure docker:v1.10.6 \
+  --addon helm:v0.3.2
 
 # Vérifier l'installation
-kubectl get pods -n capi-addon-system
+kubectl get pods -n caaph-system
 
 # 3. Analyser le HelmChartProxy (optionnel)
 cat nginx-helmchartproxy.yaml
@@ -69,8 +67,8 @@ kill $PID 2>/dev/null
 
 | Commande | Résultat OK |
 |----------|-------------|
-| `helm install capi-addon-provider...` | Release deployed, STATUS: deployed |
-| `kubectl get pods -n capi-addon-system` | capi-addon-helm-controller-manager Running |
+| `clusterctl init ... --addon helm:v0.3.2` | Provider="addon-helm" installed |
+| `kubectl get pods -n caaph-system` | caaph-controller-manager Running |
 | `kubectl label cluster...` | 2 clusters labeled |
 | `kubectl apply -f nginx-helmchartproxy.yaml` | helmchartproxy created |
 | `kubectl get helmreleaseproxy` | 2 HelmReleaseProxy (un par cluster) |
@@ -83,7 +81,7 @@ kill $PID 2>/dev/null
 
 ## ⚠️ Notes Importantes
 
-- **Installation Helm Addon Provider** : Doit être effectuée avant de créer le HelmChartProxy
+- **Installation Helm Addon Provider** : Utiliser `clusterctl init --addon helm` (compatible ClusterAPI v1.10.6)
 - **1 HelmChartProxy → N déploiements** : Un seul manifest déploie sur tous les clusters matchant le label
 - **Pattern GitOps** : Label `environment=demo` déclenche le déploiement automatique
 - **Self-service** : Nouveau cluster avec label = nginx déployé automatiquement

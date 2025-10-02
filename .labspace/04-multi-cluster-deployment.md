@@ -17,10 +17,10 @@
 
 ### Ce que vous allez apprendre
 
-✅ Créer 3 clusters Kubernetes simultanément avec un seul Helm chart
-✅ Observer la création parallèle vs séquentielle
-✅ Comprendre comment Helm peut templatiser les ressources ClusterAPI
-✅ Mesurer les gains de temps du déploiement parallèle
+- ✅ Créer 3 clusters Kubernetes simultanément avec un seul Helm chart
+- ✅ Observer la création parallèle vs séquentielle
+- ✅ Comprendre comment Helm peut templatiser les ressources ClusterAPI
+- ✅ Mesurer les gains de temps du déploiement parallèle
 
 ### Le Principe : Infrastructure as Code avec Helm
 
@@ -53,7 +53,7 @@ Méthode parallèle (ce module):
 
 **Commande :**
 ```bash
-cd /home/ubuntu/R_D/CLAUDE_PROJECTS/capi-workshop/workshop-express/04-multi-cluster-deployment
+cd ~/04-multi-cluster-deployment
 ```
 
 ---
@@ -92,6 +92,8 @@ multi-cluster-chart/
 ```bash
 cat multi-cluster-chart/values.yaml
 ```
+
+ /!\ **reduire à 2 clusters si les ressources sont limités** /!\
 
 **Explication :**
 ```yaml
@@ -476,12 +478,12 @@ multi-XX-md-0-yyy-aaa         NotReady   <none>          2m    v1.32.8
 
 ## 🎓 Points Clés à Retenir
 
-✅ **Helm + ClusterAPI = Infrastructure as Code puissante**
-✅ **Déploiement parallèle vs séquentiel** : 67% plus rapide (3 min vs 9 min)
-✅ **Templating** : 1 template → N clusters avec configurations variables
-✅ **Traçabilité** : Helm releases, versioning, rollback
-✅ **Scaling** : Déployer 100 clusters aussi facilement que 3
-✅ **Patterns production** : Multi-region, multi-env, multi-tenant
+- ✅ **Helm + ClusterAPI = Infrastructure as Code puissante**
+- ✅ **Déploiement parallèle vs séquentiel** : 67% plus rapide (3 min vs 9 min)
+- ✅ **Templating** : 1 template → N clusters avec configurations variables
+- ✅ **Traçabilité** : Helm releases, versioning, rollback
+- ✅ **Scaling** : Déployer 100 clusters aussi facilement que 3
+- ✅ **Patterns production** : Multi-region, multi-env, multi-tenant
 
 ### Cas d'Usage Réels
 
@@ -514,15 +516,11 @@ clusters:
 
 ## ⏭️ Prochaine Étape
 
-**Module 05 (20 min) :** Automation avec Helm
+**Module 05-automation-helm (20 min) :** Automation avec Helm
 - HelmChartProxy pour déployer apps multi-clusters
 - ClusterSelector pour ciblage intelligent
 - GitOps workflows
 
-```bash
-cd ../05-automation-helm
-cat commands.md
-```
 
 ---
 
@@ -609,7 +607,7 @@ spec:
 
 | Aspect | Helm | Kustomize | ytt |
 |--------|------|-----------|-----|
-| **Templating** | Go templates (puissant) | Patches (limité) | Starlark (très puissant) |
+| **Templating** | Go templates | Patches (limité) | Starlark (très puissant) |
 | **Release management** | Oui (helm list, rollback) | Non | Non |
 | **Dependencies** | Oui (sub-charts) | Non | Non |
 | **Learning curve** | Moyenne | Faible | Élevée |
@@ -790,12 +788,12 @@ helm upgrade multi-clusters multi-cluster-chart/
 
 ## 🎓 Ce Que Vous Avez Appris
 
-✅ Déployer simultanément 3 clusters avec un seul Helm chart
-✅ Comprendre le templating Helm pour ClusterAPI
-✅ Mesurer les gains de performance (67% plus rapide)
-✅ Gérer les clusters avec Helm releases (traçabilité, rollback)
-✅ Patterns production (multi-region, multi-env, DR)
-✅ Troubleshooting des déploiements multi-clusters
+- ✅ Déployer simultanément 3 clusters avec un seul Helm chart
+- ✅ Comprendre le templating Helm pour ClusterAPI
+- ✅ Mesurer les gains de performance (67% plus rapide)
+- ✅ Gérer les clusters avec Helm releases (traçabilité, rollback)
+- ✅ Patterns production (multi-region, multi-env, DR)
+- ✅ Troubleshooting des déploiements multi-clusters
 
 ---
 

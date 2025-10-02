@@ -17,28 +17,24 @@
 
 ### Ce que vous allez apprendre
 
-✅ Créer un cluster de management kind configuré pour ClusterAPI
-✅ Initialiser ClusterAPI avec le provider Docker (CAPD)
-✅ Comprendre l'architecture Management vs Workload clusters
+- ✅ Créer un cluster de management kind configuré pour ClusterAPI
+- ✅ Initialiser ClusterAPI avec le provider Docker (CAPD)
+- ✅ Comprendre l'architecture Management vs Workload clusters
 
-### Le Principe : Management Cluster = Usine à Clusters
-
-**Analogie :** Le cluster de management est comme une **usine automobile**. L'usine elle-même ne transporte pas de passagers, mais elle fabrique des voitures (workload clusters) qui le font.
+### Le Principe : Management Cluster
 
 ```
 Management Cluster (kind)
-├── ClusterAPI Controllers     → Chefs d'atelier (orchestrent la fabrication)
-└── Docker Provider            → Chaîne d'assemblage Docker
+├── ClusterAPI Controllers     
+└── Docker Provider            
 
 Produit → Workload Clusters
-├── dev-cluster (Docker)       → Voiture de développement
-├── k0s-demo-cluster           → Voiture électrique (plus économe, provider installé plus tard)
-└── multi-clusters             → Flotte de véhicules
+├── dev-cluster (Docker)       
+├── k0s-demo-cluster           
+└── multi-clusters             
 ```
 
 **Pourquoi séparer Management et Workload ?**
-- **Sécurité** : Le control plane de la fabrique est isolé des applications
-- **Stabilité** : Un workload cluster crashé n'affecte pas les autres
 - **Scalabilité** : 1 management cluster peut gérer 100+ workload clusters
 - **Opérations** : Upgrades, backups simplifiés (1 seul point de contrôle)
 
@@ -48,7 +44,7 @@ Produit → Workload Clusters
 
 #### 1️⃣ ClusterAPI Core (CAPI)
 
-**Rôle :** Framework central pour la gestion déclarative de clusters Kubernetes
+**Rôle :** "Framework"  pour la gestion déclarative de clusters Kubernetes
 
 **Composants installés :**
 - `capi-controller-manager` : Orchestrateur principal (Cluster, Machine CRDs)
@@ -75,7 +71,6 @@ Produit → Workload Clusters
 
 **⚠️ Production :** Remplacer par CAPA (AWS), CAPZ (Azure), CAPG (GCP)
 
-**Note :** Les autres providers (k0smotron, Helm Addon) seront installés plus tard, dans les modules où ils sont utilisés.
 
 ---
 
@@ -89,7 +84,7 @@ Produit → Workload Clusters
 
 **Commande :**
 ```bash
-cd /home/volcampdev/workshop-express/00-setup-management
+cd ~/00-setup-management
 chmod +x verify-tools.sh
 ./verify-tools.sh
 ```
@@ -205,20 +200,22 @@ capi-management-control-plane   Ready    control-plane   1m    v1.32.0
 ```bash
 export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
-clusterctl init --infrastructure docker:v1.10.6
+clusterctl init \
+  --core cluster-api:v1.10.6 \
+  --bootstrap kubeadm:v1.10.6 \
+  --control-plane kubeadm:v1.10.6 \
+  --infrastructure docker:v1.10.6
 ```
 
 **Explication de la commande :**
 - `export CLUSTER_TOPOLOGY=true` : Active la feature gate Cluster Topology (ClusterClass)
 - `export EXP_CLUSTER_RESOURCE_SET=true` : Active la feature gate ClusterResourceSet (installation automatique d'addons)
 - `clusterctl init` : Commande d'initialisation ClusterAPI
-- `--infrastructure docker:v1.10.6` : Spécifie le provider (CAPD) avec version fixe v1.10.6
-- Installe automatiquement :
-  - ClusterAPI Core v1.10.6
-  - Kubeadm Bootstrap Provider v1.10.6
-  - Kubeadm Control Plane Provider v1.10.6
-  - Docker Infrastructure Provider v1.10.6
-  - cert-manager (dépendance requise)
+- `--core cluster-api:v1.10.6` : Force l'installation de ClusterAPI Core v1.10.6
+- `--bootstrap kubeadm:v1.10.6` : Force l'installation du Kubeadm Bootstrap Provider v1.10.6
+- `--control-plane kubeadm:v1.10.6` : Force l'installation du Kubeadm Control Plane Provider v1.10.6
+- `--infrastructure docker:v1.10.6` : Force l'installation du Docker Infrastructure Provider v1.10.6
+- Installe également cert-manager (dépendance requise)
 
 **Résultat attendu :**
 ```
@@ -286,11 +283,6 @@ capd-system                        capd-controller-manager-xxx                  
 ✅ Socket Docker est montée et accessible: /var/run/docker.sock
    Permissions: srw-rw---- root docker
 
-🐳 Test de connectivité Docker depuis le cluster kind...
-
-✅ Communication avec Docker Daemon réussie
-   Containers visibles: 2
-
 🎛️  Vérification CAPD Controller...
 
 ✅ Namespace capd-system existe
@@ -304,7 +296,6 @@ capd-system                        capd-controller-manager-xxx                  
 
 📊 Résumé:
   ✅ Socket Docker montée: /var/run/docker.sock
-  ✅ Communication Docker fonctionnelle
   ✅ CAPD peut créer des containers pour workload clusters
 
 🚀 Le cluster de management est prêt à créer des workload clusters!
@@ -418,25 +409,17 @@ kubectl get pods -n capd-system
 kubectl get pods -n cert-manager
 ```
 
----
-
-**6.5 - Vérifier que la socket Docker est accessible**
-```bash
-# Tester depuis le container kind
-docker exec capi-management-control-plane docker ps
-
-# Devrait afficher tous les containers Docker de l'hôte
-```
+**Hint**: remplacer `get` par `klock` :)
 
 ---
 
 ## 🎓 Points Clés à Retenir
 
-✅ **Management Cluster** : Usine à clusters, héberge les controllers ClusterAPI
-✅ **ClusterAPI Core** : Framework déclaratif (Cluster, Machine CRDs)
-✅ **Docker Provider** : Infrastructure locale rapide (dev/test)
-✅ **cert-manager** : Gestion automatique certificats (dépendance CAPI)
-✅ **Autres providers** : k0smotron et Helm Addon seront installés dans les modules suivants
+- ✅ **Management Cluster** : Usine à clusters, héberge les controllers ClusterAPI
+- ✅ **ClusterAPI Core** : Framework déclaratif (Cluster, Machine CRDs)
+- ✅ **Docker Provider** : Infrastructure locale rapide (dev/test)
+- ✅ **cert-manager** : Gestion automatique certificats (dépendance CAPI)
+- ✅ **Autres providers** : k0smotron et Helm Addon seront installés dans les modules suivants
 
 ### Architecture Récapitulative
 
@@ -444,18 +427,18 @@ docker exec capi-management-control-plane docker ps
 Management Cluster (kind)
 │
 ├── ClusterAPI Core (capi-system)
-│   ├── cluster-controller      → Gère objets Cluster
-│   ├── machine-controller      → Gère objets Machine
-│   └── machinedeployment-controller → Gère scaling workers
+│   ├── cluster-controller      → Gère les objets Cluster
+│   ├── machine-controller      → Gère les objets Machine
+│   └── machinedeployment-controller → Gère le scaling workers
 │
 ├── Bootstrap Provider (capi-kubeadm-bootstrap-system)
-│   └── kubeadm-bootstrap-controller → Configure nodes avec kubeadm
+│   └── kubeadm-bootstrap-controller → Configure les nodes avec kubeadm
 │
 ├── Control Plane Provider (capi-kubeadm-control-plane-system)
-│   └── kubeadmcontrolplane-controller → Gère control planes HA
+│   └── kubeadmcontrolplane-controller → Gère le control planes HA
 │
 ├── Infrastructure Provider
-│   └── Docker Provider (capd-system) → Crée containers
+│   └── Docker Provider (capd-system) → Crée les node en containers
 │
 └── Dependencies
     └── cert-manager → Certificats TLS automatiques
@@ -465,12 +448,8 @@ Management Cluster (kind)
 
 ## ⏭️ Prochaine Étape
 
-Management cluster ✅ prêt, passez au **Module 01** :
+Management cluster ✅ prêt, passez au **Module 01-premier-cluster ** :
 
-```bash
-cd ../01-premier-cluster
-cat commands.md
-```
 
 **Module 01 :** Créer votre premier workload cluster avec Docker Provider
 
@@ -629,8 +608,8 @@ clusterctl vérifie:
 
 **2. Installation cert-manager (T+5s)**
 ```
-Why cert-manager first?
-→ ClusterAPI utilise webhooks (admission, conversion)
+Pourquoi Cert-manager en 1er?
+→ ClusterAPI utilise les webhooks (admission, conversion)
 → Webhooks nécessitent certificats TLS
 → cert-manager génère/renouvelle automatiquement les certs
 
@@ -809,7 +788,11 @@ kind delete cluster --name capi-management
 kind create cluster --config management-cluster-config.yaml
 export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
-clusterctl init --infrastructure docker:v1.10.6
+clusterctl init \
+  --core cluster-api:v1.10.6 \
+  --bootstrap kubeadm:v1.10.6 \
+  --control-plane kubeadm:v1.10.6 \
+  --infrastructure docker:v1.10.6
 ```
 
 **Vérification :**
@@ -853,7 +836,11 @@ clusterctl init --infrastructure docker --config clusterctl.yaml
 clusterctl delete --infrastructure docker --include-crd
 export CLUSTER_TOPOLOGY=true
 export EXP_CLUSTER_RESOURCE_SET=true
-clusterctl init --infrastructure docker:v1.10.6
+clusterctl init \
+  --core cluster-api:v1.10.6 \
+  --bootstrap kubeadm:v1.10.6 \
+  --control-plane kubeadm:v1.10.6 \
+  --infrastructure docker:v1.10.6
 ```
 
 ---
@@ -890,10 +877,10 @@ chmod +x full-check.sh
 
 ## 🎓 Ce Que Vous Avez Appris
 
-✅ Créer un cluster kind configuré pour ClusterAPI
-✅ Initialiser ClusterAPI avec le Docker Provider
-✅ Comprendre l'architecture Management vs Workload
-✅ Valider l'installation complète des composants
+- ✅ Créer un cluster kind configuré pour ClusterAPI
+- ✅ Initialiser ClusterAPI avec le Docker Provider
+- ✅ Comprendre l'architecture Management vs Workload
+- ✅ Valider l'installation complète des composants
 
 **Architecture Finale :**
 ```

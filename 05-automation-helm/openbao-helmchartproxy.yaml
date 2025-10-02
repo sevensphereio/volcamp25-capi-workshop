@@ -1,0 +1,14 @@
+apiVersion: addons.cluster.x-k8s.io/v1alpha1
+kind: HelmChartProxy
+metadata:
+  name: nginx-app
+  namespace: default
+spec:
+  clusterSelector:
+    matchLabels:
+      environment: demo
+  repoURL: https://openbao.github.io/openbao-helm
+  chartName: openbao
+  version: 0.18.2
+  releaseName: openbao-app
+  namespace: default

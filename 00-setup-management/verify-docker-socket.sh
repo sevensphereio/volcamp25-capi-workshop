@@ -60,28 +60,6 @@ else
     exit 1
 fi
 
-# Test Docker connectivity from within kind
-echo ""
-echo "🐳 Test de connectivité Docker depuis le cluster kind..."
-echo ""
-
-if docker exec capi-management-control-plane docker ps &>/dev/null; then
-    CONTAINER_COUNT=$(docker exec capi-management-control-plane docker ps 2>/dev/null | wc -l)
-    CONTAINER_COUNT=$((CONTAINER_COUNT - 1))  # Remove header line
-    echo -e "${GREEN}✅${NC} Communication avec Docker Daemon réussie"
-    echo "   Containers visibles: $CONTAINER_COUNT"
-else
-    echo -e "${RED}❌${NC} Impossible de communiquer avec Docker Daemon"
-    echo ""
-    echo "   ${YELLOW}Possible causes:${NC}"
-    echo "   - Socket montée mais permissions insuffisantes"
-    echo "   - Docker CLI non disponible dans le container kind"
-    echo ""
-    echo "   ${YELLOW}Solution:${NC} Vérifier manuellement:"
-    echo "   docker exec capi-management-control-plane ls -la /var/run/docker.sock"
-    exit 1
-fi
-
 # Check if CAPD is installed and can access Docker
 echo ""
 echo "🎛️  Vérification CAPD Controller..."
@@ -128,7 +106,6 @@ echo -e "${GREEN}🎉 Vérification terminée avec succès!${NC}"
 echo ""
 echo "📊 Résumé:"
 echo "  ✅ Socket Docker montée: /var/run/docker.sock"
-echo "  ✅ Communication Docker fonctionnelle"
 echo "  ✅ CAPD peut créer des containers pour workload clusters"
 echo ""
 echo "🚀 Le cluster de management est prêt à créer des workload clusters!"

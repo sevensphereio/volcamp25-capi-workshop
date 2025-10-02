@@ -50,7 +50,7 @@ kubectl get deployments -n capi-system
 kubectl get pods -n k0smotron
 
 # Vérifier Helm addon provider
-kubectl get deployments -n capi-addon-system
+kubectl get deployments -n caaph-system
 ```
 
 ### Lancer la validation
@@ -427,7 +427,7 @@ kubectl logs -n capd-system deployment/capd-controller-manager -f
 kubectl logs -n k0smotron deployment/k0smotron-controller-manager -f
 
 # Logs du Helm provider
-kubectl logs -n capi-addon-system deployment/capi-addon-helm-controller-manager -f
+kubectl logs -n caaph-system deployment/capi-addon-helm-controller-manager -f
 
 # Events d'un cluster
 kubectl get events --field-selector involvedObject.name=<cluster-name>
@@ -550,7 +550,7 @@ kubectl describe helmchartproxy <name>
 kubectl get helmreleaseproxy -A
 
 # Logs du Helm provider
-kubectl logs -n capi-addon-system deployment/capi-addon-helm-controller-manager -f
+kubectl logs -n caaph-system deployment/capi-addon-helm-controller-manager -f
 ```
 
 ---

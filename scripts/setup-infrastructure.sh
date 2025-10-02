@@ -180,14 +180,14 @@ helm repo add capi-addon-provider https://kubernetes-sigs.github.io/cluster-api-
 helm repo update &>/dev/null
 
 # Check if already installed
-if kubectl get namespace capi-addon-system &>/dev/null; then
+if kubectl get namespace caaph-system &>/dev/null; then
     echo "⚠️  Helm Addon Provider déjà installé, mise à jour..."
-    helm uninstall capi-addon-provider -n capi-addon-system --ignore-not-found
+    helm uninstall capi-addon-provider -n caaph-system --ignore-not-found
 fi
 
 # Install with helm
 helm install capi-addon-provider capi-addon-provider/cluster-api-addon-provider-helm \
-  --namespace capi-addon-system \
+  --namespace caaph-system \
   --create-namespace \
   --wait \
   --timeout 300s
@@ -240,7 +240,7 @@ done
 
 echo ""
 echo "Helm Addon Provider:"
-kubectl get pods -n capi-addon-system --no-headers | while read line; do
+kubectl get pods -n caaph-system --no-headers | while read line; do
     pod=$(echo $line | cut -d' ' -f1)
     status=$(echo $line | cut -d' ' -f3)
     if [ "$status" = "Running" ]; then
