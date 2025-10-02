@@ -60,6 +60,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
+/!\ attention si les limites se s'appliquent pas, les appliquer à la main ci-dessous Etape 11 Option B /!\
 
 ### Étape 1 : Déterminer votre système d'exploitation
 
@@ -705,7 +706,7 @@ cd 00-introduction
 =============================================
 
 Prochaine commande:
-  cd ../00-setup-management
+  cd ~/00-setup-management
   cat commands.md
 ```
 
