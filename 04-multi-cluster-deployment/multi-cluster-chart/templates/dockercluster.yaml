@@ -1,0 +1,9 @@
+{{- range .Values.clusters }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: DockerCluster
+metadata:
+  name: {{ .name }}
+  namespace: default
+spec: {}
+{{- end }}

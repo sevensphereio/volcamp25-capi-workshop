@@ -1,0 +1,19 @@
+title: Cluster API WORKSHOP
+description: |
+  Vous allez deployer un cluster Kubernetes avec ClusterAPI, ajouter un reseau Calico et automatiser le deploiement d'une application avec Helm.
+  Ce workshop est concu pour etre realise en 90 minutes.
+  Il est recommande d'avoir une connaissance de base de Kubernetes et des concepts d'infrastructure.
+  
+sections:
+  - title: 00-introduction
+    contentPath: .labspace/00-introduction.md
+  - title: 00-setup-management
+    contentPath: .labspace/00-setup-management.md
+  - title: 01-premier-cluster
+    contentPath: .labspace/01-premier-cluster.md
+  - title: 02-networking-calico
+    contentPath: .labspace/02-networking-calico.md
+  - title: 04-multi-cluster-deployment
+    contentPath: .labspace/04-multi-cluster-deployment.md
+  - title: 05-automation-helm
+    contentPath: .labspace/05-automation-helm.md
