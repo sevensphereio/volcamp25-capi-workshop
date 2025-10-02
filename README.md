@@ -62,6 +62,8 @@ Utilisation du docker labspace project (beta)
 docker compose -f oci://rzarouali/labspace-volcamp25 up -d
 ```
 
+==> ouvrez un onglet navigateur web sur http://localhost:3030
+
 ### Option B:
 #### **Module 00-setup-management** : Configuration du Management Cluster
 ```bash
