@@ -55,6 +55,14 @@ Les outils installés :
 
 Une fois l'installation terminée, suivez les modules dans l'ordre :
 
+### Option A:
+Utilisation du docker labspace project (beta)
+
+```
+docker compose -f oci://rzarouali/labspace-volcamp25 up -d
+```
+
+### Option B:
 #### **Module 00-setup-management** : Configuration du Management Cluster
 ```bash
 cd 00-setup-management
