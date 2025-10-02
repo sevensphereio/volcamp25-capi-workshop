@@ -1,7 +1,7 @@
 services:
   configurator:
     environment:
-      PROJECT_CLONE_URL: https://github.com/sevensphereio/volcamp-capi-workshop
+      PROJECT_CLONE_URL: https://github.com/xinity/volcamp-capi-workshop
 
   workspace:
     # Custom workspace changes here
