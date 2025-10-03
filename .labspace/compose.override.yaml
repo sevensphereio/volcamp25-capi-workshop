@@ -1,4 +1,7 @@
 services:
+  interface:
+    image: dockersamples/labspace-interface:dev
+    
   configurator:
     environment:
       PROJECT_CLONE_URL: https://github.com/xinity/volcamp-capi-workshop
